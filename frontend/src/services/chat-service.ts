@@ -1,4 +1,4 @@
-import { authenticatedRequest, API_BASE_URL } from "@/lib/api";
+import { authenticatedRequest, getApiBaseUrl } from "@/lib/api";
 
 export interface RetrievedChunk {
   id: string;
@@ -190,7 +190,8 @@ export const chatService = {
   ): Promise<void> => {
     try {
       const token = await getToken();
-      const response = await fetch(`${API_BASE_URL}/api/v1/workspaces/${workspaceId}/chat`, {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/v1/workspaces/${workspaceId}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

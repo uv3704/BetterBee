@@ -7,8 +7,26 @@
 
 import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig } from "axios";
 
-const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-export const API_BASE_URL = RAW_API_URL.replace(/\/+$/, "");
+/**
+ * Resolve API base URL dynamically.
+ * If running on a non-localhost hostname (e.g. yuviii.online or Vercel) and NEXT_PUBLIC_API_URL
+ * was not set during build, it safely falls back to the live Render backend.
+ */
+export function getApiBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl.trim() && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+    return envUrl.trim().replace(/\/+$/, "");
+  }
+  if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+    return "https://betterbee.onrender.com";
+  }
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, "");
+  }
+  return "http://localhost:8000";
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Create a configured Axios instance for the BetterBee API.
@@ -20,6 +38,13 @@ export const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+// Runtime interceptor ensuring non-localhost hosts always target the live production backend
+apiClient.interceptors.request.use((config) => {
+  const resolvedBase = getApiBaseUrl();
+  config.baseURL = `${resolvedBase}/api/v1`;
+  return config;
 });
 
 /**
