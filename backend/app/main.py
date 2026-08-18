@@ -249,11 +249,11 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # --- Middleware (order matters: first added = outermost) ---
     # CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
+        allow_origin_regex=r"^https://.*\.vercel\.app$|^https://.*\.onrender\.com$|^https://(www\.)?yuviii\.online$",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

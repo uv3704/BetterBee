@@ -29,7 +29,11 @@ class Settings(BaseSettings):
     API_BASE_URL: str = "http://localhost:8000"
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: list[str] | str = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] | str = [
+        "http://localhost:3000",
+        "https://yuviii.online",
+        "https://www.yuviii.online",
+    ]
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
