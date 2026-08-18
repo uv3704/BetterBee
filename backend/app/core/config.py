@@ -62,8 +62,8 @@ class Settings(BaseSettings):
 
     # --- AWS S3 / Local Storage ---
     STORAGE_PROVIDER: str = "local"     # local | s3
-    S3_BUCKET_NAME: str = "betterbee-documents"
-    S3_REGION: str = "us-east-1"
+    S3_BUCKET_NAME: str = "betterbee-docs"
+    S3_REGION: str = "ap-south-1"
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     S3_ENDPOINT_URL: str | None = None  # For MinIO compatibility
@@ -76,7 +76,7 @@ class Settings(BaseSettings):
         if v and str(v).strip():
             return str(v).strip()
         import os
-        return os.getenv("AWS_STORAGE_BUCKET_NAME", "betterbee-documents").strip()
+        return os.getenv("AWS_STORAGE_BUCKET_NAME", "betterbee-docs").strip()
 
     @field_validator("S3_REGION", mode="before")
     @classmethod
@@ -84,7 +84,7 @@ class Settings(BaseSettings):
         if v and str(v).strip():
             return str(v).strip()
         import os
-        return os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION", "us-east-1")).strip()
+        return os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION", "ap-south-1")).strip()
 
     # --- Clerk Authentication ---
     CLERK_SECRET_KEY: str = ""
