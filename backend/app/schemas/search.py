@@ -1,8 +1,10 @@
 import uuid
+
 from pydantic import BaseModel, Field
 
+
 class SearchChunkMatch(BaseModel):
-    chunk_id: uuid.UUID
+    chunk_id: str = Field(..., description="Unique chunk identifier")
     content: str = Field(..., description="Text content of the chunk")
     score: float = Field(..., description="Relevance score from retriever or similarity matching")
     page_number: int | None = None

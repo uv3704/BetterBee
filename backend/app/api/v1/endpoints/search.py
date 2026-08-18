@@ -1,6 +1,7 @@
 import uuid
+
 import structlog
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Query, status
 
 from app.core.deps import CurrentUser, SearchServiceDep, WorkspaceServiceDep
 from app.core.exceptions import ForbiddenError, NotFoundError

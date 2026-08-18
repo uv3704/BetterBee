@@ -104,7 +104,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
                 clerk_id = await verify_clerk_token(token)
                 request.state.clerk_id = clerk_id
-                
+
                 # Bind user context to logger
                 structlog.contextvars.bind_contextvars(clerk_id=clerk_id)
             except Exception:

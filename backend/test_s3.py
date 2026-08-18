@@ -1,11 +1,13 @@
-import boto3
-import sys
 import os
-from botocore.exceptions import NoCredentialsError, ClientError
+import sys
+
+import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 
 # Add parent directory to path to load settings if needed
 from dotenv import load_dotenv
+
 load_dotenv()
 
 bucket_name = os.getenv("S3_BUCKET_NAME", "betterbee-docs")
@@ -13,7 +15,7 @@ region = os.getenv("S3_REGION", "ap-south-1")
 access_key = os.getenv("AWS_ACCESS_KEY_ID")
 secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-print(f"Testing S3 Connection:")
+print("Testing S3 Connection:")
 print(f"  Bucket: {bucket_name}")
 print(f"  Region: {region}")
 print(f"  Access Key: {access_key[:8] if access_key else 'None'}...")
@@ -60,11 +62,11 @@ try:
     print("\n2. Testing write and read permissions...")
     test_key = "test_connectivity_file.txt"
     test_content = b"Connectivity test content"
-    
+
     # Upload
     s3.put_object(Bucket=bucket_name, Key=test_key, Body=test_content)
     print("   Success: Uploaded test object.")
-    
+
     # Download
     response = s3.get_object(Bucket=bucket_name, Key=test_key)
     downloaded_content = response['Body'].read()
@@ -72,7 +74,7 @@ try:
         print("   Success: Downloaded test object and content matches.")
     else:
         print("   Warning: Downloaded content does not match!")
-        
+
     # Delete
     s3.delete_object(Bucket=bucket_name, Key=test_key)
     print("   Success: Deleted test object.")

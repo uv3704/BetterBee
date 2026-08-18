@@ -6,10 +6,10 @@ Configures middleware, exception handlers, CORS, and mounts the API router.
 Uses lifespan for clean startup/shutdown of database and ChromaDB connections.
 """
 
-from contextlib import asynccontextmanager
-from collections.abc import AsyncGenerator
-from typing import Any
 import time
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, Request
@@ -44,6 +44,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     t0 = time.perf_counter()
     try:
         from sqlalchemy import text
+
         from app.db.engine import engine
 
         async with engine.connect() as conn:
@@ -97,15 +98,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         s3_connected = True
         s3_latency = int((time.perf_counter() - t0) * 1000)
 
+    # 5. Pre-warm Clerk Auth JWKS
+    try:
+        from app.core.auth import prefetch_jwks
+        await prefetch_jwks()
+    except Exception:
+        pass
+
     # 5. Check AI Models loading individually (Skip in production to avoid memory overhead)
     llm_ok = False
     llm_latency = 0
     llm_info = f"{settings.LLM_PROVIDER.capitalize()} ({settings.LLM_MODEL})"
-    
+
     embeddings_ok = False
     embeddings_latency = 0
     embedding_info = f"{settings.EMBEDDING_PROVIDER.capitalize()} ({settings.EMBEDDING_MODEL})"
-    
+
     reranker_ok = False
     reranker_latency = 0
     reranker_info = f"{settings.RERANKER_PROVIDER.capitalize()}" if settings.RERANKER_PROVIDER != "cross-encoder" else "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -137,7 +145,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 model_str = embedding.model_name
             elif hasattr(embedding, "model") and isinstance(embedding.model, str):
                 model_str = embedding.model
-                
+
             if model_str:
                 prov = settings.EMBEDDING_PROVIDER.lower()
                 prov_disp = "HuggingFace" if prov in ("huggingface", "local") else ("OpenAI" if prov == "openai" else prov.capitalize())
@@ -197,7 +205,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     print(f"Redis         {'✓' if redis_connected else '✗'}  ({redis_latency} ms)")
     print(f"{storage_label}    {'✓' if s3_connected else '✗'}  ({s3_latency} ms)")
     print(f"Chroma        {'✓' if chroma_ready else '✗'}  ({chroma_latency} ms)")
-    
+
     if settings.DEBUG:
         print(f"LLM           {'✓' if llm_ok else '✗'}  ({llm_latency} ms)")
         print(f"Embeddings    {'✓' if embeddings_ok else '✗'}  ({embeddings_latency} ms)")

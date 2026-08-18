@@ -3,7 +3,8 @@ BetterBee — LLM Provider Interface.
 """
 
 from abc import ABC, abstractmethod
-from typing import AsyncGenerator, NamedTuple
+from collections.abc import AsyncGenerator
+from typing import NamedTuple
 
 
 class ModelInfo(NamedTuple):

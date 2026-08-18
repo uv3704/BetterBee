@@ -8,10 +8,10 @@ and reranker providers based on active application configuration settings.
 import structlog
 
 from app.core.config import get_settings
-from app.rag.interfaces.llm import LLMProvider
 from app.rag.interfaces.embeddings import EmbeddingProvider
-from app.rag.interfaces.vectorstore import VectorStoreProvider
+from app.rag.interfaces.llm import LLMProvider
 from app.rag.interfaces.reranker import RerankerProvider
+from app.rag.interfaces.vectorstore import VectorStoreProvider
 
 logger = structlog.get_logger(__name__)
 

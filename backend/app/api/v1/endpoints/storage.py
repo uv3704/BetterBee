@@ -6,8 +6,9 @@ Only active/used when STORAGE_PROVIDER = "local".
 """
 
 import os
+
 import structlog
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import FileResponse
 
 from app.core.deps import StorageProviderDep

@@ -15,13 +15,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings, get_settings
 from app.db.engine import async_session_factory
 from app.models.user import User
+from app.rag.pipeline import RAGPipeline
+from app.services.chat_service import ChatService
+from app.services.document_service import DocumentService
+from app.services.search_service import SearchService
+from app.services.storage_service import StorageProvider, get_storage_provider
 from app.services.user_service import UserService
 from app.services.workspace_service import WorkspaceService
-from app.services.storage_service import StorageProvider, get_storage_provider
-from app.services.document_service import DocumentService
-from app.services.chat_service import ChatService
-from app.services.search_service import SearchService
-from app.rag.pipeline import RAGPipeline
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -82,8 +82,8 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> User:
     """Fetch the full User model of the currently authenticated user."""
-    from app.repositories.user_repo import UserRepository
     from app.core.exceptions import AuthenticationError
+    from app.repositories.user_repo import UserRepository
 
     user_repo = UserRepository(db)
     user = await user_repo.get_by_clerk_id(clerk_id)
@@ -136,7 +136,7 @@ async def get_rag_pipeline(
     storage_provider: StorageProvider = Depends(get_storage_provider_dep),
 ) -> RAGPipeline:
     """Inject a configured RAGPipeline instance."""
-    from app.rag.factory import LLMFactory, EmbeddingFactory, VectorStoreFactory, RerankerFactory
+    from app.rag.factory import EmbeddingFactory, LLMFactory, RerankerFactory, VectorStoreFactory
     from app.rag.retriever import WorkspaceRetriever
 
     llm = LLMFactory.create()

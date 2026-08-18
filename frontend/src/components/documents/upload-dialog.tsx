@@ -43,7 +43,7 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
   const hasStaging = stagedFiles.length > 0;
 
   // Function to handle a single file upload
-  const uploadFile = async (file: File, fileId: string, index: number, totalFiles: number) => {
+  const uploadFile = async (file: File, fileId: string) => {
     try {
       // 1. Initiate upload with backend
       setFiles((prev) =>
@@ -87,10 +87,11 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
       setFiles((prev) =>
         prev.map((f) => (f.id === fileId ? { ...f, status: "success", progress: 100 } : f))
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`Upload failed for ${file.name}:`, err);
+      const errorMessage = err instanceof Error ? err.message : "Upload failed";
       setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, status: "error", error: err.message || "Upload failed" } : f))
+        prev.map((f) => (f.id === fileId ? { ...f, status: "error", error: errorMessage } : f))
       );
       toast.error(`Failed to upload ${file.name}`);
     }
@@ -104,8 +105,8 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
     setStagedFiles([]);
 
     // Process all uploads in parallel
-    const uploadPromises = filesToUpload.map((staged, index) =>
-      uploadFile(staged.file, staged.id, index, filesToUpload.length)
+    const uploadPromises = filesToUpload.map((staged) =>
+      uploadFile(staged.file, staged.id)
     );
 
     await Promise.all(uploadPromises);
@@ -134,7 +135,7 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
         };
       });
 
-      setFiles((prev) => [...prev, ...newFiles.map(({ file, ...rest }) => rest)]);
+      setFiles((prev) => [...prev, ...newFiles.map((item) => ({ id: item.id, name: item.name, size: item.size, progress: item.progress, status: item.status }))]);
       setStagedFiles((prev) => [...prev, ...newFiles.map(({ id, file }) => ({ id, file }))]);
     },
     []
@@ -165,101 +166,101 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4"
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-xl rounded-2xl border border-neutral-800 bg-neutral-950 p-6 shadow-2xl space-y-6"
+        className="relative w-full max-w-lg rounded-xl border border-[#272935] bg-[#18191f] p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-900 pb-4">
+        <div className="flex items-center justify-between border-b border-[#23252d] pb-3.5">
           <div>
-            <h3 className="text-lg font-bold text-neutral-200">Upload Documents</h3>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Files are split, parsed and vectorized securely
+            <h3 className="text-sm font-semibold text-[#f4f4f6]">Upload Documents</h3>
+            <p className="text-xs text-[#8b8e9b] mt-0.5">
+              Files are parsed, chunked, and vectorized securely.
             </p>
           </div>
           <button
             onClick={handleClose}
             disabled={isUploading}
-            className="text-neutral-500 hover:text-neutral-300 p-1 hover:bg-neutral-900 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-[#8b8e9b] hover:text-[#eaebee] p-1 hover:bg-[#1f212a] rounded transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Dropzone */}
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 transition-all ${
+          className={`border border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2 transition-all ${
             isUploading
-              ? "border-neutral-900 bg-neutral-950 cursor-not-allowed opacity-50"
+              ? "border-[#23252d] bg-[#14151a] cursor-not-allowed opacity-50"
               : isDragActive
-              ? "border-amber-500 bg-amber-500/5 cursor-pointer"
-              : "border-neutral-800 hover:border-neutral-700 bg-neutral-900/20 cursor-pointer"
+              ? "border-[#d48b38] bg-[#d48b38]/5 cursor-pointer"
+              : "border-[#272935] hover:border-[#383b4b] bg-[#14151a]/60 hover:bg-[#14151a] cursor-pointer"
           }`}
         >
           <input {...getInputProps()} />
-          <UploadCloud className="h-10 w-10 text-neutral-500" />
-          <span className="text-sm font-semibold text-neutral-300">
+          <UploadCloud className="h-8 w-8 text-[#6c6f80]" />
+          <span className="text-xs font-medium text-[#eaebee]">
             {isDragActive ? "Drop documents here..." : "Drag & drop files or click to browse"}
           </span>
-          <span className="text-[10px] text-neutral-500">
+          <span className="text-[10px] text-[#6c6f80]">
             Supports PDF, DOCX, Markdown, Text, Excel, PowerPoint (max 50MB)
           </span>
         </div>
 
         {/* Upload List */}
         {files.length > 0 && (
-          <div className="max-h-60 overflow-y-auto space-y-3 pr-1">
-            <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+          <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
+            <h4 className="text-[11px] font-medium text-[#8b8e9b] uppercase tracking-wider">
               Selected Files
             </h4>
             {files.map((file) => (
               <div
                 key={file.id}
-                className="flex flex-col p-3 rounded-lg border border-neutral-900 bg-neutral-900/30 gap-2"
+                className="flex flex-col p-2.5 rounded border border-[#23252d] bg-[#14151a] gap-2"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <File className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                    <span className="text-xs font-medium text-neutral-200 truncate w-64">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <File className="h-3.5 w-3.5 text-[#d48b38] shrink-0" />
+                    <span className="text-xs font-medium text-[#eaebee] truncate max-w-xs">
                       {file.name}
                     </span>
-                    <span className="text-[10px] text-neutral-500">
+                    <span className="text-[10px] text-[#6c6f80] shrink-0">
                       ({(file.size / 1024 / 1024).toFixed(2)} MB)
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {file.status === "idle" && (
                       <button
                         onClick={() => handleRemoveFile(file.id)}
                         disabled={isUploading}
-                        className="text-neutral-500 hover:text-rose-500 p-1 hover:bg-neutral-850 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-[#6c6f80] hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded transition-colors cursor-pointer disabled:opacity-50"
                         title="Remove file"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     )}
                     {file.status === "uploading" && (
-                      <span className="text-[10px] text-amber-500 font-semibold">
+                      <span className="text-[10px] text-[#d48b38] font-mono">
                         {file.progress}%
                       </span>
                     )}
                     {file.status === "confirming" && (
                       <div className="flex items-center gap-1">
-                        <Loader2 className="h-3.5 w-3.5 text-amber-500 animate-spin" />
-                        <span className="text-[10px] text-neutral-400">Processing...</span>
+                        <Loader2 className="h-3 w-3 text-[#d48b38] animate-spin" />
+                        <span className="text-[10px] text-[#8b8e9b]">Processing...</span>
                       </div>
                     )}
                     {file.status === "success" && (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                     )}
                     {file.status === "error" && (
                       <span title={file.error}>
-                        <AlertTriangle className="h-4 w-4 text-rose-500" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
                       </span>
                     )}
                   </div>
@@ -267,9 +268,9 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
 
                 {/* Progress bar */}
                 {file.status === "uploading" && (
-                  <div className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-[#23252d] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-amber-500 transition-all duration-300"
+                      className="h-full bg-[#d48b38] transition-all duration-200"
                       style={{ width: `${file.progress}%` }}
                     />
                   </div>
@@ -281,22 +282,22 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
 
         {/* Confirmation Footer */}
         {hasStaging && (
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-900">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#23252d]">
             <button
               onClick={handleClose}
               disabled={isUploading}
-              className="px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-800 hover:bg-neutral-900 text-neutral-400 hover:text-neutral-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-xs font-medium rounded border border-[#272935] bg-[#14151a] text-[#8b8e9b] hover:text-[#eaebee] transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirmUpload}
               disabled={isUploading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 disabled:bg-neutral-800 text-neutral-950 disabled:text-neutral-600 transition-colors shadow-lg cursor-pointer disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-neutral-950" />
+                  <Loader2 className="h-3 w-3 animate-spin text-[#121316]" />
                   <span>Uploading...</span>
                 </>
               ) : (

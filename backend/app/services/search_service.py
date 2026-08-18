@@ -1,13 +1,14 @@
 import uuid
-import structlog
-from sqlalchemy import select, or_
-from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.document import Document
+import structlog
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
 from app.models.chunk import Chunk
+from app.models.document import Document
 from app.rag.retriever import WorkspaceRetriever
-from app.schemas.search import SearchResponse, SearchDocumentResult, SearchChunkMatch
+from app.schemas.search import SearchChunkMatch, SearchDocumentResult, SearchResponse
 
 logger = structlog.get_logger(__name__)
 
@@ -94,7 +95,7 @@ class SearchService:
             # Deduplicate or add chunks
             grouped_results[doc_id].append(
                 SearchChunkMatch(
-                    chunk_id=uuid.UUID(r.id) if r.id else uuid.uuid4(),
+                    chunk_id=str(r.id) if r.id else str(uuid.uuid4()),
                     content=r.document,
                     score=float(r.score),
                     page_number=r.metadata.get("page_number"),
@@ -102,7 +103,7 @@ class SearchService:
                     slide_number=r.metadata.get("slide_number"),
                     chunk_index=r.metadata.get("chunk_index"),
                 )
-              )
+            )
 
         # 5. Assemble final response
         results = []
@@ -110,7 +111,7 @@ class SearchService:
             doc = documents_dict.get(doc_id)
             if not doc:
                 continue
-            
+
             results.append(
                 SearchDocumentResult(
                     document_id=doc.id,
@@ -138,6 +139,7 @@ class SearchService:
             .join(Document)
             .where(
                 Document.workspace_id == workspace_id,
+                Document.deleted_at.is_(None),
                 or_(
                     Chunk.content.ilike(query_pattern),
                     Document.filename.ilike(query_pattern)
@@ -163,7 +165,7 @@ class SearchService:
             # For SQL matches, we assign a placeholder score of 1.0 (or similar)
             grouped_matches[doc.id].append(
                 SearchChunkMatch(
-                    chunk_id=chunk.id,
+                    chunk_id=str(chunk.id),
                     content=chunk.content,
                     score=1.0,
                     page_number=chunk.metadata_.get("page_number"),

@@ -3,15 +3,16 @@ BetterBee — Chat Session & Message ORM Models.
 """
 
 import uuid
-from typing import TYPE_CHECKING, List
-from sqlalchemy import String, ForeignKey, Boolean, Integer, JSON, Text
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models.workspace import Workspace
     from app.models.user import User
+    from app.models.workspace import Workspace
 
 
 class ChatSession(Base, TimestampMixin):
@@ -48,7 +49,7 @@ class ChatSession(Base, TimestampMixin):
     # Relationships
     workspace: Mapped["Workspace"] = relationship("Workspace")
     user: Mapped["User"] = relationship("User")
-    messages: Mapped[List["Message"]] = relationship(
+    messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="session",
         cascade="all, delete-orphan",

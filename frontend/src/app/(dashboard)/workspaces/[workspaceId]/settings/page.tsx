@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { Save, Trash2, Loader2, AlertTriangle, Settings, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 import { workspaceService } from "@/services/workspace-service";
@@ -20,9 +20,9 @@ export default function WorkspaceSettingsPage() {
 
   const workspaceId = params.workspaceId as string;
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("🐝");
+  const [customName, setCustomName] = useState<string | null>(null);
+  const [customDescription, setCustomDescription] = useState<string | null>(null);
+  const [customIcon, setCustomIcon] = useState<string | null>(null);
   const [confirmDeleteName, setConfirmDeleteName] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -30,17 +30,12 @@ export default function WorkspaceSettingsPage() {
   const { data: workspace, isLoading } = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: () => workspaceService.getWorkspace(workspaceId, getToken),
-    enabled: !!workspaceId,
+    enabled: Boolean(workspaceId),
   });
 
-  // Populate form values when data loaded
-  useEffect(() => {
-    if (workspace) {
-      setName(workspace.name);
-      setDescription(workspace.description || "");
-      setIcon(workspace.icon || "🐝");
-    }
-  }, [workspace]);
+  const name = customName ?? workspace?.name ?? "";
+  const description = customDescription ?? workspace?.description ?? "";
+  const icon = customIcon ?? workspace?.icon ?? "🐝";
 
   // Update Mutation
   const updateMutation = useMutation({
@@ -88,7 +83,7 @@ export default function WorkspaceSettingsPage() {
 
   const handleDeleteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (confirmDeleteName !== workspace?.name) {
+    if (confirmDeleteName.trim().toLowerCase() !== workspace?.name.trim().toLowerCase()) {
       toast.error("Workspace name does not match confirmation.");
       return;
     }
@@ -98,16 +93,16 @@ export default function WorkspaceSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+        <Loader2 className="h-6 w-6 text-[#8b8e9b] animate-spin" />
       </div>
     );
   }
 
   if (!workspace) {
     return (
-      <div className="text-center py-20">
-        <p className="text-red-400">Workspace not found.</p>
-        <Link href="/workspaces" className="mt-4 inline-block text-amber-500 hover:underline">
+      <div className="text-center py-20 space-y-3">
+        <p className="text-rose-400 text-xs">Workspace not found.</p>
+        <Link href="/workspaces" className="text-xs text-[#d48b38] hover:underline">
           Back to Dashboard
         </Link>
       </div>
@@ -120,112 +115,83 @@ export default function WorkspaceSettingsPage() {
       <div className="flex items-center gap-4">
         <Link
           href={`/workspaces/${workspaceId}/chat`}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded border border-[#272935] bg-[#18191f] hover:bg-[#1f212a] text-[#8b8e9b] hover:text-[#eaebee] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-100 flex items-center gap-2">
-            <Settings className="h-7 w-7 text-neutral-500" />
-            Workspace Settings
-          </h1>
-          <p className="text-sm text-neutral-400 mt-1">
-            Modify workspace preferences, appearance, and lifecycle.
-          </p>
+          <h1 className="text-lg font-medium text-[#f4f4f6]">Workspace Settings</h1>
+          <p className="text-xs text-[#8b8e9b]">Manage configuration, identity, and data for this workspace.</p>
         </div>
       </div>
 
       {/* Main Settings Form */}
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/30 p-8 shadow-2xl backdrop-blur-md">
-        <form onSubmit={handleUpdateSubmit} className="space-y-6">
-          <div className="grid grid-cols-4 gap-6">
-            {/* Icon */}
-            <div className="col-span-1 space-y-2">
-              <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block">
-                Icon
-              </label>
-              <input
-                type="text"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-                maxLength={2}
-                className="w-full bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-lg py-2 text-center text-2xl focus:outline-hidden focus:border-amber-500/50"
-              />
-            </div>
-
-            {/* Name */}
-            <div className="col-span-3 space-y-2">
-              <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block">
-                Workspace Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={100}
-                required
-                className="w-full bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-lg py-2 px-3 text-sm focus:outline-hidden focus:border-amber-500/50"
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              maxLength={255}
-              className="w-full bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-lg py-2 px-3 text-sm focus:outline-hidden focus:border-amber-500/50 resize-none"
+      <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-6 space-y-6">
+        <form onSubmit={handleUpdateSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#8b8e9b] block">Workspace Name</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setCustomName(e.target.value)}
+              className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-2 text-xs sm:text-sm focus:outline-hidden focus:border-[#3d4152]"
             />
           </div>
 
-          {/* Submit */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-900">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#8b8e9b] block">Description</label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setCustomDescription(e.target.value)}
+              className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-2 text-xs sm:text-sm focus:outline-hidden focus:border-[#3d4152]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#8b8e9b] block">Icon / Emoji</label>
+            <input
+              type="text"
+              value={icon}
+              onChange={(e) => setCustomIcon(e.target.value)}
+              className="w-24 bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-2 text-center text-sm focus:outline-hidden focus:border-[#3d4152]"
+            />
+          </div>
+
+          <div className="flex justify-end pt-2">
             <button
               type="submit"
               disabled={updateMutation.isPending}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-neutral-950 transition-colors disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {updateMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  <span>Save Changes</span>
-                </>
-              )}
+              {updateMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <span>Save Changes</span>
             </button>
           </div>
         </form>
       </div>
 
       {/* Danger Zone */}
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-8 space-y-4">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-rose-500/10 rounded-xl text-rose-500">
-            <AlertTriangle className="h-6 w-6" />
+      <div className="rounded-lg border border-rose-900/40 bg-rose-950/10 p-6 space-y-4">
+        <div className="flex items-start gap-3.5">
+          <div className="p-2 bg-rose-950/40 border border-rose-900/50 rounded text-rose-400">
+            <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-rose-400">Danger Zone</h3>
-            <p className="text-xs text-neutral-400 mt-1 max-w-xl">
-              Permanently delete this workspace and all associated documents, vector databases, and conversation histories. This action is irreversible.
+            <h3 className="text-sm font-medium text-rose-300">Danger Zone</h3>
+            <p className="text-xs text-[#8b8e9b] mt-0.5 max-w-xl leading-relaxed">
+              Permanently delete this workspace, including all associated documents, vector indexes, and conversation history. This action cannot be undone.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end border-t border-rose-500/10 pt-4">
+        <div className="flex items-center justify-end border-t border-rose-900/30 pt-4">
           <button
             onClick={() => setIsDeleteModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-rose-500 hover:bg-rose-600 text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
             <span>Delete Workspace</span>
           </button>
         </div>
@@ -234,20 +200,20 @@ export default function WorkspaceSettingsPage() {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-6 shadow-2xl">
-            <div className="flex items-center gap-3 text-rose-400">
-              <AlertTriangle className="h-6 w-6 shrink-0" />
-              <h4 className="text-lg font-bold">Are you absolutely sure?</h4>
+          <div className="w-full max-w-sm bg-[#18191f] border border-[#272935] rounded-xl p-5 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2.5 text-rose-400">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <h4 className="text-sm font-semibold text-[#f4f4f6]">Delete Workspace?</h4>
             </div>
 
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              This will permanently delete the workspace <strong className="text-neutral-200">"{workspace.name}"</strong>, including all of its files and indexes. 
+            <p className="text-xs text-[#9fa2b4] leading-relaxed">
+              This will permanently delete the workspace <strong className="text-[#f4f4f6]">&quot;{workspace.name}&quot;</strong> and all of its files.
             </p>
 
-            <form onSubmit={handleDeleteSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block">
-                  Type <span className="text-neutral-200 select-none">"{workspace.name}"</span> to confirm:
+            <form onSubmit={handleDeleteSubmit} className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] text-[#8b8e9b] block">
+                  Type <span className="text-[#f4f4f6] font-medium">{workspace.name}</span> to confirm:
                 </label>
                 <input
                   type="text"
@@ -255,34 +221,34 @@ export default function WorkspaceSettingsPage() {
                   value={confirmDeleteName}
                   onChange={(e) => setConfirmDeleteName(e.target.value)}
                   placeholder={workspace.name}
-                  className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-lg py-2 px-3 text-sm focus:outline-hidden focus:border-rose-500/50"
+                  className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-1.5 text-xs focus:outline-hidden focus:border-rose-500/50"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setIsDeleteModalOpen(false);
                     setConfirmDeleteName("");
                   }}
-                  className="px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-neutral-200 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded border border-[#272935] bg-[#14151a] text-[#8b8e9b] hover:text-[#eaebee] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={deleteMutation.isPending || confirmDeleteName !== workspace.name}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg bg-rose-500 hover:bg-rose-600 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  disabled={deleteMutation.isPending || confirmDeleteName.trim().toLowerCase() !== workspace.name.trim().toLowerCase()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-rose-600 hover:bg-rose-700 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {deleteMutation.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       <span>Deleting...</span>
                     </>
                   ) : (
                     <>
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                       <span>Delete Workspace</span>
                     </>
                   )}

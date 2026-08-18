@@ -30,13 +30,13 @@ def build_rewrite_prompt(query: str, chat_history: list[dict[str, str]]) -> list
     messages = [
         {"role": "system", "content": SYSTEM_TEMPLATE}
     ]
-    
+
     # Format history as raw text inside user prompt to teach context
     history_str = ""
     for msg in chat_history[-4:]:
         role = "User" if msg["role"] == "user" else "Assistant"
         history_str += f"{role}: {msg['content']}\n"
-        
+
     prompt_content = f"History:\n{history_str}\nUser: {query}\n\nYour output:"
     messages.append({"role": "user", "content": prompt_content})
     return messages

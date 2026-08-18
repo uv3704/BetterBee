@@ -75,82 +75,82 @@ export default function SystemStatusPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 py-4">
+    <div className="max-w-5xl mx-auto space-y-6 py-2">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-6">
+      <div className="flex items-center justify-between border-b border-[#23252d] pb-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-100 flex items-center gap-2">
-            <Activity className="h-7 w-7 text-amber-500 animate-pulse" />
-            System Health & Nodes
+          <h1 className="text-xl font-medium tracking-tight text-[#f4f4f6] flex items-center gap-2">
+            <Activity className="h-4 w-4 text-[#d48b38]" />
+            System Health &amp; Nodes
           </h1>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-xs text-[#8b8e9b] mt-0.5">
             Real-time status, network latency, and connection state of core services.
           </p>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading || isRefetching}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 transition-colors disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-[#18191f] border border-[#272935] text-[#8b8e9b] hover:text-[#eaebee] hover:bg-[#1f212a] transition-colors disabled:opacity-50 cursor-pointer"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin text-amber-500" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin text-[#d48b38]" : ""}`} />
           <span>Refresh</span>
         </button>
       </div>
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+          <Loader2 className="h-6 w-6 text-[#8b8e9b] animate-spin" />
         </div>
       ) : !health ? (
-        <div className="text-center py-20 text-rose-400">
+        <div className="text-center py-20 text-rose-400 text-xs">
           Failed to fetch system node health.
         </div>
       ) : (
         <>
           {/* Overall System Health Banner */}
           <div
-            className={`border rounded-2xl p-6 flex flex-col sm:flex-row items-center sm:justify-between gap-4 ${getStatusColor(
+            className={`border rounded-lg p-4 flex flex-col sm:flex-row items-center sm:justify-between gap-3 ${getStatusColor(
               health.status
             )}`}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {getStatusIcon(health.status)}
               <div>
-                <h3 className="text-lg font-bold capitalize">
+                <h3 className="text-sm font-medium capitalize">
                   System Status: {health.status}
                 </h3>
                 <p className="text-xs opacity-80 mt-0.5">
                   {health.status === "healthy"
                     ? "All services are functioning normally and within acceptable latency parameters."
-                    : "Some background nodes are degraded or currently unreachable. Operations may be impacted."}
+                    : "Some background nodes are degraded or currently unreachable."}
                 </p>
               </div>
             </div>
 
             {/* System Info Badges */}
-            <div className="flex items-center gap-3 self-stretch sm:self-auto justify-center sm:justify-start">
-              <div className="bg-neutral-950/40 border border-neutral-900 rounded-xl px-4 py-2 text-center text-xs">
-                <span className="text-neutral-500 block text-[9px] font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-2 self-stretch sm:self-auto justify-center sm:justify-start">
+              <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
+                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
                   Environment
                 </span>
-                <span className="font-semibold text-neutral-300 capitalize">
+                <span className="font-mono text-[11px] text-[#eaebee] capitalize">
                   {health.environment}
                 </span>
               </div>
-              <div className="bg-neutral-950/40 border border-neutral-900 rounded-xl px-4 py-2 text-center text-xs">
-                <span className="text-neutral-500 block text-[9px] font-bold uppercase tracking-wider">
+              <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
+                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
                   Uptime
                 </span>
-                <span className="font-semibold text-neutral-300 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                <span className="font-mono text-[11px] text-[#eaebee] flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-[#8b8e9b]" />
                   {formatUptime(health.uptime_seconds)}
                 </span>
               </div>
-              <div className="bg-neutral-950/40 border border-neutral-900 rounded-xl px-4 py-2 text-center text-xs">
-                <span className="text-neutral-500 block text-[9px] font-bold uppercase tracking-wider">
+              <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
+                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
                   Release
                 </span>
-                <span className="font-semibold text-neutral-300">
+                <span className="font-mono text-[11px] text-[#eaebee]">
                   v{health.version}
                 </span>
               </div>
@@ -158,143 +158,143 @@ export default function SystemStatusPage() {
           </div>
 
           {/* Node Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Database Node */}
-            <div className="rounded-2xl border border-neutral-850 bg-neutral-900/10 p-6 flex flex-col justify-between space-y-6">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider text-[10px] block">
+                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
                     PostgreSQL Node
                   </span>
-                  <h4 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
-                    <Database className="h-4.5 w-4.5 text-neutral-400" />
+                  <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
+                    <Database className="h-4 w-4 text-[#8b8e9b]" />
                     Storage Engine
                   </h4>
-                  <p className="text-xs text-neutral-400 leading-normal max-w-sm">
-                    Primary transactional storage. Houses workspaces, user details, document records, and chat session histories.
+                  <p className="text-xs text-[#8b8e9b] leading-normal max-w-sm">
+                    Primary transactional storage for workspaces, users, documents, and chats.
                   </p>
                 </div>
-                <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusColor(health.services.database.status)}`}>
+                <div className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(health.services.database.status)}`}>
                   {health.services.database.status}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-neutral-900/80 pt-4 text-xs">
-                <span className="text-neutral-500">Response Latency</span>
-                <span className="font-semibold text-neutral-300 flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-amber-500" />
+              <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
+                <span className="text-[#6c6f80]">Response Latency</span>
+                <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
+                  <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.database.latency_ms ? `${health.services.database.latency_ms} ms` : "--"}
                 </span>
               </div>
 
               {health.services.database.error && (
-                <div className="p-3 border border-rose-500/10 bg-rose-500/5 rounded-xl text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
+                <div className="p-2 border border-rose-900/40 bg-rose-950/20 rounded text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
                   {health.services.database.error}
                 </div>
               )}
             </div>
 
             {/* Redis Node */}
-            <div className="rounded-2xl border border-neutral-850 bg-neutral-900/10 p-6 flex flex-col justify-between space-y-6">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider text-[10px] block">
+                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
                     Redis Cache
                   </span>
-                  <h4 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
-                    <Cpu className="h-4.5 w-4.5 text-neutral-400" />
-                    Broker & Queue
+                  <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-[#8b8e9b]" />
+                    Broker &amp; Queue
                   </h4>
-                  <p className="text-xs text-neutral-400 leading-normal max-w-sm">
-                    In-memory data structures. Handles distributed task queuing for background worker document parser ingestion.
+                  <p className="text-xs text-[#8b8e9b] leading-normal max-w-sm">
+                    In-memory data structures and task queueing for background document processing.
                   </p>
                 </div>
-                <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusColor(health.services.redis.status)}`}>
+                <div className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(health.services.redis.status)}`}>
                   {health.services.redis.status}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-neutral-900/80 pt-4 text-xs">
-                <span className="text-neutral-500">Ping Latency</span>
-                <span className="font-semibold text-neutral-300 flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-amber-500" />
+              <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
+                <span className="text-[#6c6f80]">Ping Latency</span>
+                <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
+                  <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.redis.latency_ms ? `${health.services.redis.latency_ms} ms` : "--"}
                 </span>
               </div>
 
               {health.services.redis.error && (
-                <div className="p-3 border border-rose-500/10 bg-rose-500/5 rounded-xl text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
+                <div className="p-2 border border-rose-900/40 bg-rose-950/20 rounded text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
                   {health.services.redis.error}
                 </div>
               )}
             </div>
 
             {/* ChromaDB Node */}
-            <div className="rounded-2xl border border-neutral-850 bg-neutral-900/10 p-6 flex flex-col justify-between space-y-6">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider text-[10px] block">
+                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
                     ChromaDB Store
                   </span>
-                  <h4 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
-                    <Server className="h-4.5 w-4.5 text-neutral-400" />
+                  <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
+                    <Server className="h-4 w-4 text-[#8b8e9b]" />
                     Vector Engine
                   </h4>
-                  <p className="text-xs text-neutral-400 leading-normal max-w-sm">
-                    Vector index database. Conducts highly optimized embedding lookups for semantic prompt retrieval.
+                  <p className="text-xs text-[#8b8e9b] leading-normal max-w-sm">
+                    Persistent vector database for multi-workspace isolated semantic retrieval.
                   </p>
                 </div>
-                <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusColor(health.services.chromadb.status)}`}>
+                <div className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(health.services.chromadb.status)}`}>
                   {health.services.chromadb.status}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-neutral-900/80 pt-4 text-xs">
-                <span className="text-neutral-500">Query Latency</span>
-                <span className="font-semibold text-neutral-300 flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-amber-500" />
+              <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
+                <span className="text-[#6c6f80]">Query Latency</span>
+                <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
+                  <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.chromadb.latency_ms ? `${health.services.chromadb.latency_ms} ms` : "--"}
                 </span>
               </div>
 
               {health.services.chromadb.error && (
-                <div className="p-3 border border-rose-500/10 bg-rose-500/5 rounded-xl text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
+                <div className="p-2 border border-rose-900/40 bg-rose-950/20 rounded text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
                   {health.services.chromadb.error}
                 </div>
               )}
             </div>
 
             {/* Ollama / AI Provider Node */}
-            <div className="rounded-2xl border border-neutral-850 bg-neutral-900/10 p-6 flex flex-col justify-between space-y-6">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-neutral-500 font-bold uppercase tracking-wider text-[10px] block">
+                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
                     AI Compute Nodes
                   </span>
-                  <h4 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
-                    <Cpu className="h-4.5 w-4.5 text-neutral-400" />
-                    Inference & Embeddings
+                  <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-[#8b8e9b]" />
+                    Inference &amp; Embeddings
                   </h4>
-                  <p className="text-xs text-neutral-400 leading-normal max-w-sm">
-                    Inference engine (Ollama local server or cloud LLMs). Executing token generation and embedding transformations.
+                  <p className="text-xs text-[#8b8e9b] leading-normal max-w-sm">
+                    Inference engines (Groq LPU, OpenAI, or local Ollama) for text and vector generation.
                   </p>
                 </div>
-                <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusColor(health.services.ollama.status)}`}>
+                <div className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(health.services.ollama.status)}`}>
                   {health.services.ollama.status === "not_configured" ? "Cloud-based" : health.services.ollama.status}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-neutral-900/80 pt-4 text-xs">
-                <span className="text-neutral-500">Connection State</span>
-                <span className="font-semibold text-neutral-300 flex items-center gap-1.5">
+              <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
+                <span className="text-[#6c6f80]">Connection State</span>
+                <span className="font-mono text-[#eaebee] flex items-center gap-1.5 text-[11px]">
                   {health.services.ollama.status === "not_configured" ? (
                     <>
-                      <span>Using Cloud Provider APIs</span>
-                      <ExternalLink className="h-3 w-3 text-neutral-500" />
+                      <span>Groq Llama-3 Cloud</span>
+                      <ExternalLink className="h-3 w-3 text-[#6c6f80]" />
                     </>
                   ) : (
                     <>
-                      <Zap className="h-3 w-3 text-amber-500" />
+                      <Zap className="h-3 w-3 text-[#d48b38]" />
                       <span>{health.services.ollama.latency_ms ? `${health.services.ollama.latency_ms} ms` : "--"}</span>
                     </>
                   )}
@@ -302,7 +302,7 @@ export default function SystemStatusPage() {
               </div>
 
               {health.services.ollama.error && (
-                <div className="p-3 border border-rose-500/10 bg-rose-500/5 rounded-xl text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
+                <div className="p-2 border border-rose-900/40 bg-rose-950/20 rounded text-[11px] text-rose-400 font-mono overflow-x-auto whitespace-pre-wrap select-text">
                   {health.services.ollama.error}
                 </div>
               )}

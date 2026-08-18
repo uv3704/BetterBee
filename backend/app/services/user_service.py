@@ -3,6 +3,7 @@ BetterBee — User Service.
 """
 
 import uuid
+
 import structlog
 
 from app.models.user import User

@@ -4,6 +4,7 @@ BetterBee — Celery Async Document Processing Task.
 
 import asyncio
 import uuid
+
 import structlog
 
 from app.workers.celery_app import celery_app
@@ -24,8 +25,8 @@ def process_document(self, document_id: str) -> None:
     from app.db.engine import async_session_factory
     from app.repositories.document_repo import DocumentRepository
     from app.repositories.workspace_repo import WorkspaceRepository
-    from app.services.storage_service import get_storage_provider
     from app.services.document_service import DocumentService
+    from app.services.storage_service import get_storage_provider
 
     async def _async_ingest():
         async with async_session_factory() as session:
@@ -38,7 +39,7 @@ def process_document(self, document_id: str) -> None:
                     workspace_repo,
                     storage_provider,
                 )
-                
+
                 await document_service.ingest_document(uuid.UUID(document_id))
                 await session.commit()
             except Exception as e:

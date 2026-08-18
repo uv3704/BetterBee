@@ -3,16 +3,17 @@ BetterBee — Document Ingestion & Management API Endpoints.
 """
 
 import uuid
+
 import structlog
-from fastapi import APIRouter, Depends, status, BackgroundTasks, Request
+from fastapi import APIRouter, BackgroundTasks, Request, status
 
 from app.core.deps import CurrentUser, DocumentServiceDep
 from app.schemas.document import (
-    DocumentUploadInitiateRequest,
-    DocumentUploadInitiateResponse,
     DocumentConfirmRequest,
     DocumentResponse,
     DocumentStatusResponse,
+    DocumentUploadInitiateRequest,
+    DocumentUploadInitiateResponse,
 )
 
 logger = structlog.get_logger(__name__)

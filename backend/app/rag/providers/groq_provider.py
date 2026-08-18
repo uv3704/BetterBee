@@ -2,10 +2,11 @@
 BetterBee — Groq LLM Provider.
 """
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 import structlog
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.rag.interfaces.llm import LLMProvider, ModelInfo
 

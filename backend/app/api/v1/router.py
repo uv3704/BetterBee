@@ -7,7 +7,16 @@ New feature routers are registered here.
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, health, workspaces, storage, documents, chat, search, analytics
+from app.api.v1.endpoints import (
+    analytics,
+    auth,
+    chat,
+    documents,
+    health,
+    search,
+    storage,
+    workspaces,
+)
 
 api_router = APIRouter()
 

@@ -1,364 +1,656 @@
 "use client";
 
 import Link from "next/link";
-import { UserButton, useUser } from "@clerk/nextjs";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  Shield,
-  Cpu,
+  FileText,
+  Search,
+  ArrowRight,
   Database,
-  CloudLightning,
-  ChevronRight,
-  ArrowUpRight,
-  Upload,
-  Lock,
-  Terminal,
-  Activity,
   Layers,
-  HardDrive,
+  Sparkles,
+  Table,
+  Presentation,
+  FileCode,
+  ShieldCheck,
+  Building2,
+  Scale,
+  LineChart,
+  Cpu,
+  CheckCircle2,
+  Lock,
+  Zap,
+  ExternalLink,
 } from "lucide-react";
-import { BeeIcon } from "@/components/icons";
+import { PublicNav } from "@/components/public-nav";
+import { PublicFooter } from "@/components/public-footer";
 
 export default function Home() {
-  const { isLoaded, isSignedIn } = useUser();
-  const [pipelineStep, setPipelineStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<"chat" | "search" | "sources">("chat");
+  const [cvTab, setCvTab] = useState<"experience" | "skills" | "education">("experience");
 
-  // Cycle through pipeline steps in mock UI
+  // Pre-warm backend on page load
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPipelineStep((prev) => (prev + 1) % 4);
-    }, 4000);
-    return () => clearInterval(timer);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    fetch(`${apiUrl}/api/v1/health`).catch(() => {});
   }, []);
 
-  const pipeline = [
-    {
-      title: "Document Uploaded",
-      desc: "User uploads Q3_Financials.pdf to workspace.",
-      status: "Ingesting to AWS S3 Private Bucket...",
-      icon: <Upload className="h-5 w-5 text-cyan-400" />,
-    },
-    {
-      title: "Local Document Parsing",
-      desc: "FastAPI extracts and chunks text using background tasks.",
-      status: "Parsed into 48 semantic chunks...",
-      icon: <Layers className="h-5 w-5 text-purple-400" />,
-    },
-    {
-      title: "Vector Store Ingestion",
-      desc: "ChromaDB vector database stores the generated embeddings.",
-      status: "Local ChromaDB database updated successfully.",
-      icon: <Database className="h-5 w-5 text-emerald-400" />,
-    },
-    {
-      title: "Secure Query Response",
-      desc: "Groq LLM generates final answer using retrieved context.",
-      status: "Answer returned in 410ms with zero data leakage.",
-      icon: <CloudLightning className="h-5 w-5 text-amber-400" />,
-    },
-  ];
-
   return (
-    <div className="relative min-h-screen bg-[#07090e] text-neutral-100 overflow-hidden font-sans">
-      {/* Background Decorative Blobs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-950/20 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-950/20 blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-[#121316] text-[#eaebee] selection:bg-[#2b2d38] selection:text-[#f4f4f6]">
+      <PublicNav />
 
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 border-b border-neutral-900 bg-[#07090e]/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <BeeIcon className="h-8 w-8 text-amber-500 flex-shrink-0 animate-pulse" />
-              <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
-                BetterBee
-              </span>
-            </Link>
+      <main className="w-full max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 pt-12 pb-20 space-y-20">
+        {/* Hero Section */}
+        <section className="space-y-6 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#23252d] bg-[#18191f] text-xs font-medium text-[#9fa2b4]">
+            <Lock className="h-3 w-3 text-[#d48b38]" />
+            <span>Production Document Intelligence for Teams</span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
-            <a href="#features" className="hover:text-cyan-400 transition-colors">Features</a>
-            <a href="#metrics" className="hover:text-cyan-400 transition-colors">Performance</a>
-            <a href="#architecture" className="hover:text-cyan-400 transition-colors">Security Architecture</a>
-          </nav>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-[#f4f4f6] leading-[1.2]">
+            Turn company documents into an instant, verifiable AI knowledge base.
+          </h1>
 
-          <div className="flex items-center gap-4">
-            {isLoaded && (
-              <>
-                {!isSignedIn ? (
-                  <>
-                    <Link href="/sign-in">
-                      <button className="px-4 py-2 text-sm font-semibold border border-neutral-800 rounded-lg hover:bg-neutral-950 transition-all cursor-pointer">
-                        Sign In
-                      </button>
-                    </Link>
-                    <Link href="/workspaces">
-                      <button className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 text-neutral-950 hover:from-cyan-400 hover:to-blue-500 rounded-lg shadow-lg shadow-cyan-500/10 cursor-pointer">
-                        Get Started
-                      </button>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/workspaces">
-                      <button className="px-4 py-2 text-sm font-semibold border border-cyan-800/50 hover:border-cyan-500 text-cyan-400 rounded-lg hover:bg-cyan-950/20 transition-all flex items-center gap-1.5 cursor-pointer">
-                        Go to Dashboard <ArrowUpRight className="h-4 w-4" />
-                      </button>
-                    </Link>
-                    <UserButton />
-                  </>
-                )}
-              </>
+          <p className="text-sm sm:text-base text-[#9fa2b4] leading-relaxed pt-1 max-w-3xl">
+            BetterBee indexes your organization&apos;s reports, contracts, spreadsheets, and slide decks into private vector stores. Query thousands of pages simultaneously and receive factual answers with exact page, sheet, and slide citations.
+          </p>
+
+          <div className="pt-2 flex flex-wrap items-center gap-3">
+            <Link
+              href="/workspaces"
+              className="px-4 py-2.5 text-xs sm:text-sm font-medium bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] rounded-md transition-colors inline-flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              Get Started Free <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/how-it-works"
+              className="px-4 py-2.5 text-xs sm:text-sm font-medium bg-[#18191f] hover:bg-[#1f212a] text-[#b0b3c1] hover:text-[#eaebee] border border-[#272935] rounded-md transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              How It Works &amp; Specs <ArrowRight className="h-3.5 w-3.5 text-[#8b8e9b]" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Live Interactive Product Demonstration */}
+        <section className="rounded-lg border border-[#23252d] bg-[#18191f] overflow-hidden">
+          <div className="border-b border-[#23252d] px-4 py-3 flex items-center justify-between bg-[#15161b] text-xs">
+            <div className="flex items-center gap-2 text-[#8b8e9b]">
+              <span className="font-mono text-[11px] text-[#6c6f80]">workspace &mdash;</span>
+              <span className="text-[#b0b3c1] font-medium">Enterprise_Procurement_2024</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-[#121316] p-0.5 rounded border border-[#23252d]">
+              {(["chat", "search", "sources"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1 rounded text-[11px] capitalize transition-colors ${
+                    activeTab === tab
+                      ? "bg-[#23252d] text-[#f4f4f6] font-medium"
+                      : "text-[#8b8e9b] hover:text-[#eaebee]"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 text-xs sm:text-sm space-y-4">
+            {activeTab === "chat" && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded bg-[#272935] flex items-center justify-center text-[10px] font-semibold text-[#8b8e9b] shrink-0">
+                    Q
+                  </div>
+                  <div className="text-[#b0b3c1] pt-0.5 font-medium">
+                    What is our termination clause penalty and what notice period is required under Master_Service_Agreement.pdf?
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 pl-0 sm:pl-9">
+                  <div className="rounded-md border border-[#272935] bg-[#14151a] p-4 text-[#c7cad6] space-y-3 leading-relaxed max-w-3xl">
+                    <p>
+                      According to <strong>Section 8.2 (Termination for Convenience)</strong> of the Master Services Agreement:
+                    </p>
+                    <ul className="list-disc pl-4 space-y-1.5 text-[#9fa2b4] text-xs">
+                      <li>
+                        <strong>Notice Period:</strong> Either party may terminate without cause by providing at least <strong>60 calendar days written notice</strong>.
+                      </li>
+                      <li>
+                        <strong>Penalty Structure:</strong> Early termination within the initial 12-month commitment incurs an early exit fee equal to <strong>50% of the remaining contracted monthly recurring revenue</strong>.
+                      </li>
+                    </ul>
+
+                    <div className="pt-2.5 border-t border-[#23252d] flex flex-wrap items-center gap-2 text-[11px] text-[#8b8e9b]">
+                      <span className="text-[#6c6f80]">Grounded Citations:</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#1c1e27] border border-[#2c2e3a] text-[#b0b3c1]">
+                        <FileText className="h-3 w-3 text-[#d48b38]" /> Master_Service_Agreement.pdf &middot; Page 14 (Section 8.2)
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#1c1e27] border border-[#2c2e3a] text-[#b0b3c1]">
+                        <Table className="h-3 w-3 text-[#d48b38]" /> Rate_Card_Schedule_B.xlsx &middot; Sheet: Fee Schedule
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "search" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 rounded border border-[#272935] bg-[#121316] px-3 py-2 text-xs text-[#b0b3c1]">
+                  <Search className="h-3.5 w-3.5 text-[#6c6f80]" />
+                  <span>termination fee early exit penalty 60 days notice</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="rounded border border-[#23252d] bg-[#14151a] p-3 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-[#eaebee]">Master_Service_Agreement.pdf</span>
+                      <span className="text-[#6c6f80] font-mono text-[11px]">96% Match &middot; Page 14</span>
+                    </div>
+                    <p className="text-xs text-[#8b8e9b] leading-normal">
+                      &ldquo;8.2 Termination for Convenience. Client may terminate this Agreement upon sixty (60) days prior written notice, subject to early termination fees set forth in Schedule B...&rdquo;
+                    </p>
+                  </div>
+                  <div className="rounded border border-[#23252d] bg-[#14151a] p-3 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-[#eaebee]">Rate_Card_Schedule_B.xlsx</span>
+                      <span className="text-[#6c6f80] font-mono text-[11px]">88% Match &middot; Sheet 1</span>
+                    </div>
+                    <p className="text-xs text-[#8b8e9b] leading-normal">
+                      &ldquo;Row 42: Early Termination Fee = 50% * Remaining Monthly Minimum Commitment Balance.&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "sources" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="rounded border border-[#23252d] bg-[#14151a] p-3.5 space-y-1.5">
+                  <div className="font-medium text-[#eaebee]">Master_Service_Agreement.pdf</div>
+                  <div className="text-[#6c6f80]">Document ID: doc_7fa82 &middot; Page 14 &middot; Chunk 48</div>
+                  <div className="text-[11px] text-[#9fa2b4] bg-[#18191f] p-2 rounded border border-[#23252d]">
+                    Contains termination definitions, notice periods, and dispute resolution terms.
+                  </div>
+                </div>
+                <div className="rounded border border-[#23252d] bg-[#14151a] p-3.5 space-y-1.5">
+                  <div className="font-medium text-[#eaebee]">Rate_Card_Schedule_B.xlsx</div>
+                  <div className="text-[#6c6f80]">Document ID: doc_3bc19 &middot; Sheet: Fee Schedule</div>
+                  <div className="text-[11px] text-[#9fa2b4] bg-[#18191f] p-2 rounded border border-[#23252d]">
+                    Contains fee structures, billing rates, and multiplier formulas.
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        </div>
-      </header>
+        </section>
 
-      {/* Hero Section */}
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-6 max-w-3xl mx-auto"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-950/20 text-xs font-semibold text-cyan-400 mb-2">
-            <Lock className="h-3 w-3 animate-pulse" /> 100% Secure, Self-Hosted RAG Stack
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-b from-white to-neutral-400 bg-clip-text text-transparent leading-[1.1]">
-            Your Private AI Workspace
-          </h1>
-          <p className="text-lg text-neutral-400 leading-relaxed">
-            Take complete control of your data. BetterBee lets you ingest private documents, build localized vector databases, and run queries using ultra-fast cloud LLMs with absolutely zero data leakage. Fully optimized to run on low-resource environments.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href="/workspaces">
-              <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold bg-[#00dbe9] hover:bg-[#2feeff] text-neutral-950 rounded-xl shadow-xl shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                Launch Workspace <ChevronRight className="h-5 w-5" />
-              </button>
-            </Link>
-            <a href="#features" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900 rounded-xl transition-all cursor-pointer">
-                Explore Features
-              </button>
-            </a>
-          </div>
-        </motion.div>
-
-        {/* Mock UI Pipeline Showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-16 max-w-4xl mx-auto rounded-2xl border border-neutral-900 bg-[#0f1118]/80 backdrop-blur-sm p-6 shadow-2xl shadow-black/60 text-left"
-        >
-          <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4 mb-6">
-            <div className="flex items-center gap-2">
-              <div className="h-3.5 w-3.5 rounded-full bg-red-500/80" />
-              <div className="h-3.5 w-3.5 rounded-full bg-yellow-500/80" />
-              <div className="h-3.5 w-3.5 rounded-full bg-green-500/80" />
-              <span className="text-xs text-neutral-500 font-mono ml-4">RAG Pipeline Monitor</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-cyan-950/40 border border-cyan-800/30 text-[10px] font-mono text-cyan-400">
-              <Terminal className="h-3 w-3" /> system_active
-            </div>
+        {/* Section 1: What BetterBee Can Do (Core Platform Capabilities) */}
+        <section id="capabilities" className="space-y-8 pt-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d48b38]">
+              Platform Capabilities
+            </span>
+            <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+              What BetterBee Does for Your Organization
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8b8e9b] max-w-2xl">
+              Eliminate hours of manual document review. BetterBee acts as a reliable, always-available intelligence layer on top of your files.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {pipeline.map((step, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-xl border transition-all duration-300 ${
-                  pipelineStep === idx
-                    ? "border-cyan-500/40 bg-cyan-950/20 shadow-lg shadow-cyan-500/5"
-                    : "border-neutral-800/60 bg-neutral-900/40"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`p-2 rounded-lg ${
-                    pipelineStep === idx ? "bg-cyan-950/60" : "bg-neutral-800/40"
-                  }`}>
-                    {step.icon}
-                  </div>
-                  <span className="text-[10px] font-mono text-neutral-500">0{idx + 1}</span>
-                </div>
-                <h3 className="text-sm font-semibold text-neutral-200">{step.title}</h3>
-                <p className="text-xs text-neutral-400 mt-1">{step.desc}</p>
-                {pipelineStep === idx && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-3 text-[10px] font-mono text-cyan-400 border-t border-cyan-500/10 pt-2.5"
-                  >
-                    {step.status}
-                  </motion.div>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-5 space-y-3">
+              <div className="h-8 w-8 rounded bg-[#14151a] border border-[#272935] flex items-center justify-center text-[#d48b38]">
+                <Search className="h-4 w-4" />
               </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Stats Section */}
-      <section id="metrics" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-neutral-900">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { metric: "0%", title: "AI Model Training Leakage", desc: "No data is sent to external training datasets." },
-            { metric: "< 0.6s", title: "Free Tier Server Boot Speed", desc: "Optimized lazy loading prevents boot OOMs." },
-            { metric: "~270 MB", title: "Runtime In-Memory Footprint", desc: "Comfortably runs under the 512MB Render limit." },
-            { metric: "100%", title: "File & Vector DB Ownership", desc: "All indexes are saved directly in your control." },
-          ].map((item, idx) => (
-            <div key={idx} className="space-y-2 text-center md:text-left">
-              <div className="text-4xl md:text-5xl font-extrabold text-cyan-400 font-mono tracking-tight">{item.metric}</div>
-              <h4 className="text-sm font-bold text-neutral-300">{item.title}</h4>
-              <p className="text-xs text-neutral-500">{item.desc}</p>
+              <h3 className="text-sm font-medium text-[#eaebee]">
+                Natural Language Semantic Search
+              </h3>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Find concepts, clauses, numbers, and technical requirements across thousands of pages even when you don&apos;t remember the exact keyword.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Features Grid Section */}
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-neutral-900 space-y-16">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-200">
-            Engineered for Privacy, Speed, and Efficiency
-          </h2>
-          <p className="text-neutral-400">
-            We stripped out the heavy dependencies and rebuilt the pipeline to fit low-resource servers without removing core functionality.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: <Cpu className="h-6 w-6 text-cyan-400" />,
-              title: "Local HuggingFace Embeddings",
-              desc: "Generate vectors offline using `all-MiniLM-L6-v2` directly inside the Python process. Completely free and secure.",
-            },
-            {
-              icon: <Activity className="h-6 w-6 text-purple-400" />,
-              title: "Bypass Reranker Settings",
-              desc: "Save 180MB+ of RAM by choosing the lightweight Bypass Reranker option (`RERANKER_PROVIDER=none`), avoiding model bloat.",
-            },
-            {
-              icon: <Database className="h-6 w-6 text-emerald-400" />,
-              title: "FastAPI Background Ingest",
-              desc: "No paid Celery worker services needed. All files are split and ingested in background thread tasks safely.",
-            },
-            {
-              icon: <HardDrive className="h-6 w-6 text-blue-400" />,
-              title: "AWS S3 Private Storage",
-              desc: "Uploaded files are securely stored in your private AWS S3 bucket, retrieved temporarily using pre-signed links.",
-            },
-            {
-              icon: <Shield className="h-6 w-6 text-amber-400" />,
-              title: "PgBouncer Compatibility",
-              desc: "Prepared statement cache disabled for `asyncpg` to guarantee database stability under transaction pooling.",
-            },
-            {
-              icon: <CloudLightning className="h-6 w-6 text-cyan-400" />,
-              title: "Ultra-Fast Groq Integration",
-              desc: "Leverages the Groq API to query state-of-the-art models like Llama-3 in milliseconds for zero local LLM RAM overhead.",
-            },
-          ].map((feat, idx) => (
-            <div
-              key={idx}
-              className="p-6 rounded-2xl border border-neutral-900/60 bg-[#0f1118]/40 hover:border-neutral-800 transition-all duration-300 space-y-4 hover:shadow-lg hover:shadow-cyan-950/5 group"
-            >
-              <div className="p-3 bg-neutral-900 rounded-xl w-fit group-hover:scale-110 transition-transform">
-                {feat.icon}
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-5 space-y-3">
+              <div className="h-8 w-8 rounded bg-[#14151a] border border-[#272935] flex items-center justify-center text-[#d48b38]">
+                <Sparkles className="h-4 w-4" />
               </div>
-              <h3 className="text-lg font-semibold text-neutral-200">{feat.title}</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">{feat.desc}</p>
+              <h3 className="text-sm font-medium text-[#eaebee]">
+                Grounded Q&A with Citations
+              </h3>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Ask specific questions and get synthesized answers that cite the exact page number, spreadsheet row, or slide for full verification.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Security Architecture Flow */}
-      <section id="architecture" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-neutral-900 space-y-16">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-200">
-            How Your Data Remains 100% Private
-          </h2>
-          <p className="text-neutral-400">
-            BetterBee isolates documents and database indexes within your private workspace.
-          </p>
-        </div>
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-5 space-y-3">
+              <div className="h-8 w-8 rounded bg-[#14151a] border border-[#272935] flex items-center justify-center text-[#d48b38]">
+                <Layers className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm font-medium text-[#eaebee]">
+                Multi-Department Workspaces
+              </h3>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Create dedicated workspaces for Legal, Finance, HR, or client accounts with isolated vector collections and strict permission boundaries.
+              </p>
+            </div>
+          </div>
+        </section>
 
-        <div className="relative max-w-3xl mx-auto p-8 rounded-2xl border border-neutral-900 bg-[#0c0e14] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/10 to-blue-950/10 opacity-30" />
-          
-          <div className="relative space-y-8 z-10">
+        {/* Section 2: How It Works (The 4-Step Technical Architecture) */}
+        <section id="how-it-works" className="space-y-8 pt-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d48b38]">
+              Under The Hood
+            </span>
+            <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+              How BetterBee Works Under the Hood
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8b8e9b] max-w-2xl">
+              A transparent, production-grade retrieval-augmented generation (RAG) pipeline designed for low resource overhead and zero hallucinations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                title: "1. Isolated Upload",
-                desc: "Documents are uploaded directly from your browser to your private S3 bucket. No third-party servers ever read the file keys.",
+                step: "01",
+                icon: Layers,
+                title: "1. Ingestion & Structural Parsing",
+                desc: "Uploaded files are stored directly in private AWS S3. Background parsers extract formatted text while maintaining exact page numbers, slide indexes, and sheet coordinates.",
               },
               {
-                title: "2. Encrypted Parsing & Embedding",
-                desc: "Your self-hosted FastAPI server downloads and splits the file. Embedding vectors are generated locally or via secure API endpoints.",
+                step: "02",
+                icon: Database,
+                title: "2. Chunking & Local Embeddings",
+                desc: "Documents are split into contextual chunks with overlap. Semantic embeddings are computed via sentence-transformers and indexed into local ChromaDB collections.",
               },
               {
-                title: "3. Local Vector Storage",
-                desc: "Embeddings are indexed locally in ChromaDB and mapped directly to your workspace. They never leave your private server database.",
+                step: "03",
+                icon: Search,
+                title: "3. Vector Search & Reranking",
+                desc: "When a query is submitted, ChromaDB performs cosine similarity search within the target workspace. Top matches are scored and filtered for optimal relevance.",
               },
               {
-                title: "4. Anonymized LLM Prompts",
-                desc: "Queries fetch matching context from ChromaDB. Only the raw context and question are sent to the Groq API, with strict privacy switches to prevent data logging.",
+                step: "04",
+                icon: Zap,
+                title: "4. LLM Synthesis & Streaming",
+                desc: "Retrieved context and user prompts are passed to high-speed Groq inference engines (Llama 3.3). Responses stream back in milliseconds with exact citation metadata.",
               },
-            ].map((step, idx) => (
-              <div key={idx} className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="h-8 w-8 rounded-full border border-cyan-500/30 bg-cyan-950/50 flex items-center justify-center text-xs font-mono font-bold text-cyan-400">
-                    {idx + 1}
-                  </div>
-                  {idx < 3 && <div className="w-0.5 bg-neutral-800 flex-grow my-2" />}
+            ].map((item, idx) => (
+              <div key={idx} className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs text-[#6c6f80] font-mono">
+                  <item.icon className="h-4 w-4 text-[#d48b38]" />
+                  <span>{item.step}</span>
                 </div>
-                <div className="space-y-1 pt-0.5">
-                  <h4 className="text-md font-bold text-neutral-200">{step.title}</h4>
-                  <p className="text-sm text-neutral-400 leading-relaxed">{step.desc}</p>
-                </div>
+                <h3 className="text-sm font-medium text-[#eaebee]">{item.title}</h3>
+                <p className="text-xs text-[#8b8e9b] leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Call To Action */}
-      <section className="bg-gradient-to-b from-[#07090e] to-[#0c101a] py-20 border-t border-neutral-900 text-center relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[200px] bg-cyan-950/10 blur-[100px] pointer-events-none" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-200">
-            Secure Your Knowledge Base Today
-          </h2>
-          <p className="text-neutral-400 max-w-xl mx-auto">
-            Self-host BetterBee on Render, Railway, or fly.io and experience private document intelligence with zero overhead.
-          </p>
-          <div className="flex justify-center">
-            <Link href="/workspaces">
-              <button className="px-8 py-4 text-base font-semibold bg-[#00dbe9] hover:bg-[#2feeff] text-neutral-950 rounded-xl shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer">
-                Enter App Workspace <ArrowUpRight className="h-5 w-5" />
-              </button>
+          <div className="pt-2">
+            <Link
+              href="/how-it-works"
+              className="inline-flex items-center gap-1.5 text-xs text-[#d48b38] hover:text-[#e5a04e] font-medium transition-colors"
+            >
+              Read full architecture, latency budget &amp; parser specifications <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-950 bg-[#05060a] py-8 text-center text-xs text-neutral-600">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <BeeIcon className="h-4 w-4 text-neutral-600" />
-            <span className="font-semibold text-neutral-500">BetterBee</span>
+        {/* Section 3: Enterprise Use Cases */}
+        <section id="use-cases" className="space-y-8 pt-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d48b38]">
+              Real-World Applications
+            </span>
+            <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+              How Companies Use BetterBee
+            </h2>
           </div>
-          <div>
-            &copy; {new Date().getFullYear()} BetterBee Private AI. All rights reserved.
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-[#eaebee]">
+                <Scale className="h-4 w-4 text-[#d48b38]" />
+                <span>Legal & Compliance</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Review NDAs, MSAs, and vendor agreements. Check indemnity clauses, liability caps, and renewal deadlines in seconds.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-[#eaebee]">
+                <LineChart className="h-4 w-4 text-[#d48b38]" />
+                <span>Finance & Operations</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Query multi-sheet balance sheets, audit reports, and investor updates. Extract margin figures and cost breakdowns accurately.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-[#eaebee]">
+                <Cpu className="h-4 w-4 text-[#d48b38]" />
+                <span>Engineering & Product</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Search architecture specifications, API guidelines, and security policies without sifting through outdated wikis.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-[#eaebee]">
+                <Building2 className="h-4 w-4 text-[#d48b38]" />
+                <span>HR & Employee Onboarding</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Help new hires find company policies, benefits guides, and standard operating procedures instantly through conversational search.
+              </p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </section>
+
+        {/* Section 4: Universal File Formats */}
+        <section id="formats" className="space-y-6 pt-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d48b38]">
+              Format Support
+            </span>
+            <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+              Supported Document Formats
+            </h2>
+            <p className="text-xs text-[#8b8e9b]">
+              Parsers extract clean text and metadata across standard file extensions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+            {[
+              { label: "PDF Documents", ext: ".pdf", icon: FileText },
+              { label: "Word Documents", ext: ".docx", icon: FileText },
+              { label: "Spreadsheets", ext: ".xlsx", icon: Table },
+              { label: "Presentations", ext: ".pptx", icon: Presentation },
+              { label: "Markdown", ext: ".md", icon: FileCode },
+              { label: "Plain Text", ext: ".txt", icon: FileText },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="rounded border border-[#23252d] bg-[#18191f] p-3 text-center space-y-1.5"
+              >
+                <item.icon className="h-4 w-4 mx-auto text-[#8b8e9b]" />
+                <div className="font-mono text-xs font-medium text-[#d48b38]">{item.ext}</div>
+                <div className="text-[11px] text-[#6c6f80]">{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Section 5: Security & Infrastructure */}
+        <section id="security" className="space-y-6 pt-4">
+          <div className="space-y-1">
+            <span className="text-xs font-mono uppercase tracking-wider text-[#d48b38]">
+              Security & Compliance
+            </span>
+            <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+              Enterprise-Grade Privacy Controls
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-[#eaebee]">
+                <ShieldCheck className="h-4 w-4 text-[#d48b38]" />
+                <span>Zero Model Training</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Your documents and vector collections remain strictly your property. No client data is ever used to train external LLMs.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-[#eaebee]">
+                <CheckCircle2 className="h-4 w-4 text-[#d48b38]" />
+                <span>Isolated Vector Collections</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                ChromaDB stores embeddings with dedicated collection prefixes per workspace to eliminate data bleeding between projects.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-[#eaebee]">
+                <CheckCircle2 className="h-4 w-4 text-[#d48b38]" />
+                <span>Private AWS S3 Storage</span>
+              </div>
+              <p className="text-[#8b8e9b] leading-relaxed">
+                Direct-to-S3 presigned upload URLs keep file transfers encrypted in transit and at rest with AWS SSE.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 6: Bottom Product Call to Action */}
+        <section className="rounded-xl border border-[#23252d] bg-[#18191f] p-8 sm:p-12 text-center space-y-4">
+          <h2 className="text-2xl font-medium tracking-tight text-[#f4f4f6]">
+            Start Searching Your Documents Today
+          </h2>
+          <p className="text-xs sm:text-sm text-[#8b8e9b] max-w-lg mx-auto">
+            Create your first workspace, upload company documentation, and start receiving grounded answers in minutes.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/workspaces"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-medium bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] rounded-md transition-colors shadow-xs cursor-pointer"
+            >
+              Open Workspaces Dashboard <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Glimpse of Portfolio & Curriculum Vitae (yuviii.in) */}
+        <section id="portfolio-glimpse" className="pt-2">
+          <div className="rounded-2xl border border-[#2b2e3c] bg-[#15171f] p-6 sm:p-8 lg:p-10 space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {/* Left Column: Hero Editorial Identity */}
+              <div className="lg:col-span-5 space-y-5">
+                <div className="flex items-center gap-2 text-[11px] font-mono tracking-wider text-[#9fa2b4] uppercase">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Open to Work &middot; Mandsaur, MP, India</span>
+                </div>
+
+                <div className="space-y-3">
+                  <h2 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#f4f4f6]">
+                    I&apos;m Yuvraj.
+                  </h2>
+                  <p className="text-sm font-medium text-[#dcdfe8] leading-relaxed">
+                    Full-Stack Developer leveraging Java, Next.js, FastAPI, and AI/ML to build scalable applications.
+                  </p>
+                  <p className="text-xs text-[#8b8e9b] leading-relaxed pt-1">
+                    I&apos;m a computer science engineering student (AI specialization) and developer based in India. I focus on building production-grade full-stack applications, intelligent multimodal RAG systems, and performant backend services with Java, Python, and TypeScript.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center gap-3 text-xs">
+                  <a
+                    href="https://yuviii.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 bg-[#f4f4f6] hover:bg-white text-[#121316] font-semibold rounded-md transition-colors inline-flex items-center gap-2 cursor-pointer shadow-xs"
+                  >
+                    <span>VIEW LIVE PORTFOLIO</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href="https://github.com/uv3704"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2.5 bg-[#1e202a] hover:bg-[#272935] text-[#eaebee] border border-[#2e3240] rounded-md transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>GitHub</span>
+                    <ExternalLink className="h-3 w-3 text-[#8b8e9b]" />
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/in/uv3704/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2.5 bg-[#1e202a] hover:bg-[#272935] text-[#eaebee] border border-[#2e3240] rounded-md transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>LinkedIn</span>
+                    <ExternalLink className="h-3 w-3 text-[#8b8e9b]" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Column: Interactive Curriculum Vitae Preview */}
+              <div className="lg:col-span-7 rounded-xl border border-[#2e3240] bg-[#191b24] shadow-md overflow-hidden text-xs">
+                {/* CV Header */}
+                <div className="border-b border-[#282b36] px-4 py-3 bg-[#13151c] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#d48b38]" />
+                    <span className="font-mono text-[10px] tracking-wider text-[#9fa2b4] uppercase">
+                      Curriculum Vitae Preview
+                    </span>
+                  </div>
+                  <a
+                    href="https://yuviii.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-[10px] text-[#d48b38] hover:text-[#e5a04e] flex items-center gap-1 transition-colors uppercase tracking-wider"
+                  >
+                    <span>Full Catalog</span>
+                    <ExternalLink className="h-2.5 w-2.5" />
+                  </a>
+                </div>
+
+                {/* Candidate Info Header */}
+                <div className="p-4 sm:p-5 border-b border-[#282b36] bg-[#161822] space-y-1 text-center sm:text-left">
+                  <h3 className="text-base font-semibold text-[#f4f4f6] font-serif">
+                    Yuvraj Singh Rathore
+                  </h3>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-[11px] text-[#8b8e9b]">
+                    <span>+91 6232394854</span>
+                    <span>&middot;</span>
+                    <a href="mailto:uv3704@gmail.com" className="text-[#d48b38] hover:underline">
+                      uv3704@gmail.com
+                    </a>
+                    <span>&middot;</span>
+                    <span>Mandsaur, MP, India</span>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex items-center border-b border-[#282b36] bg-[#13151c] px-3">
+                  {[
+                    { id: "experience", label: "Experience" },
+                    { id: "skills", label: "Skills" },
+                    { id: "education", label: "Education" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setCvTab(tab.id as typeof cvTab)}
+                      className={`px-3 py-2 text-[11px] font-mono uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
+                        cvTab === tab.id
+                          ? "border-[#d48b38] text-[#f4f4f6] font-medium"
+                          : "border-transparent text-[#6c6f80] hover:text-[#9fa2b4]"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab Content */}
+                <div className="p-4 sm:p-5 space-y-4 min-h-[160px]">
+                  {cvTab === "experience" && (
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-0.5">
+                          <span className="font-medium text-[#eaebee]">
+                            Infosys Springboard <span className="text-[#8b8e9b]">&middot; AI/ML Intern</span>
+                          </span>
+                          <span className="font-mono text-[10px] text-[#6c6f80]">Oct 2024 – Dec 2024</span>
+                        </div>
+                        <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#9fa2b4] leading-relaxed">
+                          <li>Built CNN model using TensorFlow achieving 97.5% accuracy on 10-class image classification.</li>
+                          <li>Reduced model size by 35% using quantization and pruning techniques for efficient deployment.</li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t border-[#232530]">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-0.5">
+                          <span className="font-medium text-[#eaebee]">
+                            ThrivesUp Consultancy Services <span className="text-[#8b8e9b]">&middot; Java Backend Intern</span>
+                          </span>
+                          <span className="font-mono text-[10px] text-[#6c6f80]">Jul 2025 – Sep 2025</span>
+                        </div>
+                        <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#9fa2b4] leading-relaxed">
+                          <li>Developed 12+ RESTful API endpoints using Java, Spring patterns, JDBC, and MySQL for academic records.</li>
+                          <li>Optimized database queries reducing query response times from 500ms to under 90ms.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {cvTab === "skills" && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="rounded border border-[#282b36] bg-[#14151e] p-3 space-y-1">
+                        <span className="font-mono text-[10px] text-[#d48b38] uppercase">Languages &amp; Core</span>
+                        <p className="text-[11px] text-[#eaebee]">Java, Python, TypeScript, SQL, JavaScript, HTML5/CSS3</p>
+                      </div>
+                      <div className="rounded border border-[#282b36] bg-[#14151e] p-3 space-y-1">
+                        <span className="font-mono text-[10px] text-[#d48b38] uppercase">Full-Stack &amp; Frameworks</span>
+                        <p className="text-[11px] text-[#eaebee]">FastAPI, Next.js 15, React 19, Spring Boot, Tailwind CSS</p>
+                      </div>
+                      <div className="rounded border border-[#282b36] bg-[#14151e] p-3 space-y-1">
+                        <span className="font-mono text-[10px] text-[#d48b38] uppercase">AI / ML &amp; Retrieval</span>
+                        <p className="text-[11px] text-[#eaebee]">RAG Pipelines, ChromaDB, SentenceTransformers, Groq, PyTorch</p>
+                      </div>
+                      <div className="rounded border border-[#282b36] bg-[#14151e] p-3 space-y-1">
+                        <span className="font-mono text-[10px] text-[#d48b38] uppercase">Databases &amp; Cloud</span>
+                        <p className="text-[11px] text-[#eaebee]">AWS S3, PostgreSQL, Redis, Docker, Git, REST APIs</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {cvTab === "education" && (
+                    <div className="space-y-3 text-xs">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-[#eaebee]">Bachelor of Technology (B.Tech)</span>
+                          <span className="font-mono text-[10px] text-[#6c6f80]">2022 – 2026</span>
+                        </div>
+                        <p className="text-[11px] text-[#d48b38]">Computer Science &amp; Engineering (AI Specialization)</p>
+                        <p className="text-[11px] text-[#8b8e9b]">Faculty of Engineering and Technology, Mandsaur University, MP, India</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* CV Footer */}
+                <div className="border-t border-[#282b36] px-4 py-2.5 bg-[#13151c] flex items-center justify-between text-[10px] text-[#6c6f80] font-mono">
+                  <span>Mandsaur, MP, India</span>
+                  <a
+                    href="https://yuviii.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#d48b38] hover:text-[#e5a04e] flex items-center gap-1 transition-colors uppercase tracking-wider"
+                  >
+                    <span>Full Career &amp; Projects</span>
+                    <span>&rarr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <PublicFooter />
     </div>
   );
 }

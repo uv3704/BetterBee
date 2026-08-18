@@ -4,16 +4,17 @@ BetterBee — Document ORM Model.
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, List
-from sqlalchemy import String, ForeignKey, Integer, DateTime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models.workspace import Workspace
-    from app.models.user import User
     from app.models.chunk import Chunk
+    from app.models.user import User
+    from app.models.workspace import Workspace
 
 
 class Document(Base, TimestampMixin):
@@ -75,7 +76,7 @@ class Document(Base, TimestampMixin):
     # Relationships
     workspace: Mapped["Workspace"] = relationship("Workspace")
     uploader: Mapped["User"] = relationship("User")
-    chunks: Mapped[List["Chunk"]] = relationship(
+    chunks: Mapped[list["Chunk"]] = relationship(
         "Chunk",
         back_populates="document",
         cascade="all, delete-orphan",

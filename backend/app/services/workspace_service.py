@@ -3,6 +3,7 @@ BetterBee — Workspace Service.
 """
 
 import uuid
+
 import structlog
 from slugify import slugify
 
@@ -128,3 +129,20 @@ class WorkspaceService:
 
         logger.info("Deleting workspace", workspace_id=workspace_id, owner_id=user_id)
         await self._workspace_repo.delete(workspace)
+
+        # 1. Clean up S3 storage files under this workspace
+        try:
+            from app.services.storage_service import get_storage_provider
+            storage_provider = get_storage_provider()
+            await storage_provider.delete_prefix(f"workspaces/{workspace_id}/")
+            logger.info("Deleted workspace documents from S3 storage", workspace_id=str(workspace_id))
+        except Exception as e:
+            logger.warning("Could not delete S3 files on workspace delete", error=str(e))
+
+        # 2. Clean up vector database collection for this workspace
+        try:
+            from app.rag.factory import get_vector_store
+            vector_store = get_vector_store()
+            await vector_store.delete_collection(str(workspace_id))
+        except Exception as e:
+            logger.warning("Could not delete vector store collection on workspace delete", error=str(e))

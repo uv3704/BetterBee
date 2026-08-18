@@ -2,10 +2,11 @@
 BetterBee — Anthropic LLM Provider.
 """
 
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 import structlog
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from app.rag.interfaces.llm import LLMProvider, ModelInfo
 

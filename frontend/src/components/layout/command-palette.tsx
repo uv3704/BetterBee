@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter, useParams, usePathname } from "next/navigation";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,10 +27,16 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
+interface CommandItem {
+  type: "search-result" | "navigation" | "workspace" | "account";
+  label: string;
+  subtitle?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  action: () => void;
+}
+
 export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const router = useRouter();
-  const params = useParams();
-  const pathname = usePathname();
   const { getToken } = useAuth();
   const { signOut, openUserProfile } = useClerk();
   const { activeWorkspace, setActiveWorkspace } = useWorkspaceStore();
@@ -70,69 +76,27 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         5
       );
     },
-    enabled: isOpen && !!activeWorkspace && !!debouncedSearch.trim(),
+    enabled: isOpen && Boolean(activeWorkspace && debouncedSearch.trim()),
   });
 
-  // Reset selected index when search changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [search]);
-
-  // Keyboard controls (Esc, Enter, Up, Down)
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + 1, totalItems - 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        triggerSelectedItem();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, searchResults, workspaces, activeWorkspace]);
-
-  // Autofocus input
+  // Autofocus input & reset state on open
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
-      setSearch("");
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // Close when clicking backdrop
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Compile list of items currently shown for keyboard navigation mapping
-  const getItems = () => {
-    const items: Array<{
-      type: "search-result" | "navigation" | "workspace" | "account";
-      label: string;
-      icon: React.ComponentType<any>;
-      action: () => void;
-      subtitle?: string;
-    }> = [];
+  const items = useMemo(() => {
+    const list: CommandItem[] = [];
 
     // 1. Search Results (if searching)
     if (search.trim() && searchResults?.results) {
       searchResults.results.forEach((doc) => {
         const bestMatch = doc.matches?.[0]?.content || "";
-        items.push({
+        list.push({
           type: "search-result",
           label: doc.filename,
           subtitle: bestMatch ? `"${bestMatch.substring(0, 75)}..."` : "Document Match",
@@ -149,7 +113,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     // 2. Navigation items
     if (!search.trim()) {
-      items.push({
+      list.push({
         type: "navigation",
         label: "Go to Chat",
         subtitle: "Chat with workspace knowledge base",
@@ -159,7 +123,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           if (activeWorkspace) router.push(`/workspaces/${activeWorkspace.id}/chat`);
         },
       });
-      items.push({
+      list.push({
         type: "navigation",
         label: "Go to Document Library",
         subtitle: "Manage and upload documents",
@@ -169,7 +133,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           if (activeWorkspace) router.push(`/workspaces/${activeWorkspace.id}/documents`);
         },
       });
-      items.push({
+      list.push({
         type: "navigation",
         label: "Go to Document Explorer (Search)",
         subtitle: "Run semantic and keyword searches",
@@ -179,7 +143,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           if (activeWorkspace) router.push(`/workspaces/${activeWorkspace.id}/search`);
         },
       });
-      items.push({
+      list.push({
         type: "navigation",
         label: "Go to Workspace Settings",
         subtitle: "Manage workspace details and preferences",
@@ -189,7 +153,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           if (activeWorkspace) router.push(`/workspaces/${activeWorkspace.id}/settings`);
         },
       });
-      items.push({
+      list.push({
         type: "navigation",
         label: "Go to Workspaces Dashboard",
         subtitle: "List and switch all workspaces",
@@ -203,14 +167,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     // 3. Switch Workspaces (only shown if not actively searching or if query matches workspace name)
     const filteredWorkspaces = workspaces.filter(
-      (ws) =>
+      (ws: Workspace) =>
         ws.id !== activeWorkspace?.id &&
         (!search.trim() || ws.name.toLowerCase().includes(search.toLowerCase()))
     );
 
     if (filteredWorkspaces.length > 0) {
-      filteredWorkspaces.forEach((ws) => {
-        items.push({
+      filteredWorkspaces.forEach((ws: Workspace) => {
+        list.push({
           type: "workspace",
           label: `Switch to Workspace: ${ws.name}`,
           subtitle: ws.description || `/${ws.slug}`,
@@ -226,7 +190,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     // 4. Account Settings
     if (!search.trim()) {
-      items.push({
+      list.push({
         type: "account",
         label: "Manage Profile",
         subtitle: "Clerk Account Profile Settings",
@@ -236,47 +200,74 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           openUserProfile();
         },
       });
-      items.push({
+      list.push({
         type: "account",
         label: "Sign Out",
         subtitle: "Log out of BetterBee",
         icon: LogOut,
         action: () => {
           onClose();
-          signOut(() => router.push("/sign-in"));
+          void signOut(() => router.push("/sign-in"));
         },
       });
     }
 
-    return items;
-  };
+    return list;
+  }, [search, searchResults, activeWorkspace, workspaces, router, onClose, setActiveWorkspace, openUserProfile, signOut]);
 
-  const items = getItems();
   const totalItems = items.length;
 
-  const triggerSelectedItem = () => {
-    if (items[selectedIndex]) {
-      items[selectedIndex].action();
+  // Keyboard controls (Esc, Enter, Up, Down)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, Math.max(0, totalItems - 1)));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (items[selectedIndex]) {
+          items[selectedIndex].action();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, selectedIndex, totalItems, items, onClose]);
+
+  // Close when clicking backdrop
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
     }
   };
 
   // Group items by category for rendering
-  const groupedItems = items.reduce((groups, item, idx) => {
-    const category =
-      item.type === "search-result"
-        ? "Document Search Results"
-        : item.type === "navigation"
-        ? "Quick Navigation"
-        : item.type === "workspace"
-        ? "Switch Workspaces"
-        : "Account Settings";
+  const groupedItems = useMemo(() => {
+    return items.reduce((groups, item, idx) => {
+      const category =
+        item.type === "search-result"
+          ? "Document Search Results"
+          : item.type === "navigation"
+          ? "Quick Navigation"
+          : item.type === "workspace"
+          ? "Switch Workspaces"
+          : "Account Settings";
 
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push({ ...item, globalIndex: idx });
-    return groups;
-  }, {} as Record<string, Array<any>>);
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push({ ...item, globalIndex: idx });
+      return groups;
+    }, {} as Record<string, Array<CommandItem & { globalIndex: number }>>);
+  }, [items]);
 
   return (
     <AnimatePresence>
@@ -300,7 +291,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 ref={inputRef}
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setSelectedIndex(0);
+                }}
                 placeholder="Type a command or search documents..."
                 className="flex-1 bg-transparent text-sm text-neutral-200 placeholder-neutral-500 focus:outline-hidden"
               />
@@ -335,10 +329,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         const isSelected = selectedIndex === item.globalIndex;
                         return (
                           <button
-                            key={item.label + item.globalIndex}
+                            key={`${item.label}-${item.globalIndex}`}
                             onClick={item.action}
                             onMouseEnter={() => setSelectedIndex(item.globalIndex)}
-                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all cursor-pointer ${
                               isSelected
                                 ? "bg-amber-500/10 text-amber-500 border border-amber-500/10"
                                 : "text-neutral-400 hover:bg-neutral-900/50 border border-transparent"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
@@ -21,14 +21,6 @@ export default function SearchPage() {
   const [queryInput, setQueryInput] = useState(initialQuery);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [searchType, setSearchType] = useState<"semantic" | "keyword">("semantic");
-
-  useEffect(() => {
-    const q = searchParams.get("q");
-    if (q) {
-      setQueryInput(q);
-      setSearchQuery(q);
-    }
-  }, [searchParams]);
 
   // Query search service
   const { data, isLoading, error } = useQuery({
@@ -55,16 +47,16 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-neutral-950 text-neutral-100 p-6 custom-scrollbar h-[calc(100vh-4rem)]">
-      <div className="max-w-4xl mx-auto space-y-8 select-none">
+    <div className="flex-1 overflow-y-auto bg-[#121316] text-[#eaebee] p-4 sm:p-6 custom-scrollbar h-[calc(100vh-4rem)]">
+      <div className="max-w-4xl mx-auto space-y-6 select-none">
         
         {/* Page Hero */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-neutral-100 flex items-center gap-2">
-            <Search className="h-6 w-6 text-amber-500" />
+        <div className="space-y-1 border-b border-[#23252d] pb-4">
+          <h1 className="text-xl font-medium tracking-tight text-[#f4f4f6] flex items-center gap-2">
+            <Search className="h-4 w-4 text-[#d48b38]" />
             Document Explorer
           </h1>
-          <p className="text-xs text-neutral-500 leading-normal">
+          <p className="text-xs text-[#8b8e9b]">
             Locate exact matches, sections, and tables across your workspace document corpus.
           </p>
         </div>
@@ -72,40 +64,40 @@ export default function SearchPage() {
         {/* Search Control Box */}
         <form
           onSubmit={handleSearchSubmit}
-          className="bg-neutral-900/30 border border-neutral-900 p-6 rounded-2xl space-y-4 shadow-sm"
+          className="bg-[#18191f] border border-[#23252d] p-4 sm:p-5 rounded-lg space-y-4 shadow-xs"
         >
           {/* Tabs */}
-          <div className="flex gap-2 p-1 rounded-xl bg-neutral-950 border border-neutral-900 w-fit">
+          <div className="flex gap-1 p-0.5 rounded bg-[#14151a] border border-[#272935] w-fit">
             <button
               type="button"
               onClick={() => setSearchType("semantic")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
                 searchType === "semantic"
-                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/10 shadow-xs"
-                  : "text-neutral-500 hover:text-neutral-300 border border-transparent"
+                  ? "bg-[#23252d] text-[#f4f4f6]"
+                  : "text-[#8b8e9b] hover:text-[#eaebee]"
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-3 w-3 text-[#d48b38]" />
               <span>Semantic Search</span>
             </button>
             <button
               type="button"
               onClick={() => setSearchType("keyword")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
                 searchType === "keyword"
-                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/10 shadow-xs"
-                  : "text-neutral-500 hover:text-neutral-300 border border-transparent"
+                  ? "bg-[#23252d] text-[#f4f4f6]"
+                  : "text-[#8b8e9b] hover:text-[#eaebee]"
               }`}
             >
-              <FileText className="h-3.5 w-3.5" />
+              <FileText className="h-3 w-3 text-[#8b8e9b]" />
               <span>Keyword Matching</span>
             </button>
           </div>
 
           {/* Search Inputs */}
-          <div className="flex gap-3">
-            <div className="relative flex-1 flex items-center rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 focus-within:border-amber-500/50 transition-all">
-              <Search className="h-4 w-4 text-neutral-500 shrink-0 mr-3" />
+          <div className="flex gap-2">
+            <div className="relative flex-1 flex items-center rounded border border-[#272935] bg-[#14151a] px-3 py-1.5 focus-within:border-[#3d4152] transition-colors">
+              <Search className="h-3.5 w-3.5 text-[#6c6f80] shrink-0 mr-2" />
               <input
                 type="text"
                 value={queryInput}
@@ -115,20 +107,20 @@ export default function SearchPage() {
                     ? "Ask a question or enter a topic concept..."
                     : "Search for specific literal keywords, names, or values..."
                 }
-                className="flex-1 bg-transparent text-sm text-neutral-100 placeholder-neutral-500 focus:outline-hidden"
+                className="flex-1 bg-transparent text-xs sm:text-sm text-[#eaebee] placeholder-[#6c6f80] focus:outline-hidden"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-sm shadow-md shadow-amber-500/10 active:scale-98 transition-all cursor-pointer disabled:bg-neutral-800 disabled:text-neutral-600 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] font-medium text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-[#121316]" />
               ) : (
                 <>
                   <span>Search</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3 w-3" />
                 </>
               )}
             </button>
@@ -142,11 +134,11 @@ export default function SearchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-16 text-center space-y-3"
+              className="flex flex-col items-center justify-center py-14 text-center space-y-2"
             >
-              <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-              <span className="text-xs text-neutral-500 font-semibold uppercase tracking-wider">
-                Searching documents database...
+              <Loader2 className="h-6 w-6 animate-spin text-[#8b8e9b]" />
+              <span className="text-xs text-[#8b8e9b]">
+                Searching document database...
               </span>
             </motion.div>
           ) : error ? (
@@ -154,13 +146,13 @@ export default function SearchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="p-4 border border-red-500/20 bg-red-500/5 text-red-400 text-xs rounded-xl flex items-center gap-2"
+              className="p-3 border border-rose-900/40 bg-rose-950/20 text-rose-400 text-xs rounded-lg flex items-center gap-2"
             >
               <span>Search query failed. Please verify API connection or try again.</span>
             </motion.div>
           ) : data ? (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
             >
@@ -176,29 +168,29 @@ export default function SearchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="space-y-4 pt-4"
+              className="space-y-3 pt-2"
             >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block">
-                Suggested exploration queries
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#8b8e9b] block">
+                Suggested queries
               </span>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                 <button
                   onClick={() => handleSuggestionClick("guidelines and requirements")}
-                  className="flex items-center justify-between text-left p-4 rounded-xl border border-neutral-900 bg-neutral-900/10 hover:bg-neutral-900/30 hover:border-neutral-800 transition-all cursor-pointer text-xs"
+                  className="flex items-center justify-between text-left p-3 rounded-lg border border-[#23252d] bg-[#18191f] hover:bg-[#1f212a] hover:border-[#2f3240] transition-colors cursor-pointer text-xs"
                 >
-                  <span className="text-neutral-300 font-medium truncate max-w-[250px]">
-                    "guidelines and requirements"
+                  <span className="text-[#c7cad6] font-medium truncate max-w-[250px]">
+                    &quot;guidelines and requirements&quot;
                   </span>
-                  <HelpCircle className="h-4 w-4 text-neutral-600 shrink-0 ml-2" />
+                  <HelpCircle className="h-3.5 w-3.5 text-[#6c6f80] shrink-0 ml-2" />
                 </button>
                 <button
                   onClick={() => handleSuggestionClick("financial performance table")}
-                  className="flex items-center justify-between text-left p-4 rounded-xl border border-neutral-900 bg-neutral-900/10 hover:bg-neutral-900/30 hover:border-neutral-800 transition-all cursor-pointer text-xs"
+                  className="flex items-center justify-between text-left p-3 rounded-lg border border-[#23252d] bg-[#18191f] hover:bg-[#1f212a] hover:border-[#2f3240] transition-colors cursor-pointer text-xs"
                 >
-                  <span className="text-neutral-300 font-medium truncate max-w-[250px]">
-                    "financial performance table"
+                  <span className="text-[#c7cad6] font-medium truncate max-w-[250px]">
+                    &quot;financial performance table&quot;
                   </span>
-                  <HelpCircle className="h-4 w-4 text-neutral-600 shrink-0 ml-2" />
+                  <HelpCircle className="h-3.5 w-3.5 text-[#6c6f80] shrink-0 ml-2" />
                 </button>
               </div>
             </motion.div>

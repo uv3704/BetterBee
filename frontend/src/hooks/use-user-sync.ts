@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,7 +15,8 @@ export function useUserSync() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  const hasSynced = useRef(false);
+  const [isSynced, setIsSynced] = useState(false);
+  const syncAttemptedRef = useRef(false);
 
   // Sync mutation
   const syncMutation = useMutation({
@@ -25,7 +26,7 @@ export function useUserSync() {
       // Invalidate queries that might depend on current user
       queryClient.setQueryData(["currentUserProfile"], data);
       queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
-      hasSynced.current = true;
+      setIsSynced(true);
     },
     onError: (error) => {
       console.error("User synchronization failed:", error);
@@ -37,15 +38,16 @@ export function useUserSync() {
   const profileQuery = useQuery({
     queryKey: ["currentUserProfile"],
     queryFn: () => authService.getMe(getToken),
-    enabled: isSignedIn && isLoaded && hasSynced.current,
+    enabled: Boolean(isSignedIn && isLoaded && isSynced),
     retry: 1,
   });
 
   useEffect(() => {
-    // Only sync if Clerk is loaded, user is signed in, and we haven't synced in this component lifecycle
-    if (isLoaded && isSignedIn && user && !hasSynced.current && !syncMutation.isPending) {
+    // Only sync if Clerk is loaded, user is signed in, and we haven't initiated sync in this component lifecycle
+    if (isLoaded && isSignedIn && user && !syncAttemptedRef.current && !syncMutation.isPending) {
       const email = user.primaryEmailAddress?.emailAddress;
       if (email) {
+        syncAttemptedRef.current = true;
         const payload: UserSyncPayload = {
           clerk_id: user.id,
           email: email,
@@ -59,7 +61,7 @@ export function useUserSync() {
 
   return {
     isSyncing: syncMutation.isPending,
-    isSynced: hasSynced.current || !!profileQuery.data,
+    isSynced: isSynced || Boolean(profileQuery.data),
     profile: profileQuery.data || null,
     error: syncMutation.error || profileQuery.error,
   };

@@ -49,3 +49,10 @@ class VectorStoreProvider(ABC):
         Delete all chunks belonging to a specific document ID.
         """
         pass
+
+    @abstractmethod
+    async def delete_collection(self, collection_name: str) -> None:
+        """
+        Delete an entire vector collection.
+        """
+        pass

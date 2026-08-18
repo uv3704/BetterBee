@@ -70,6 +70,22 @@ class Settings(BaseSettings):
     S3_PRESIGNED_URL_EXPIRY: int = 3600  # 1 hour
     LOCAL_STORAGE_DIR: str = "./storage_data"
 
+    @field_validator("S3_BUCKET_NAME", mode="before")
+    @classmethod
+    def parse_s3_bucket(cls, v: Any, info: Any) -> str:
+        if v and str(v).strip():
+            return str(v).strip()
+        import os
+        return os.getenv("AWS_STORAGE_BUCKET_NAME", "betterbee-documents").strip()
+
+    @field_validator("S3_REGION", mode="before")
+    @classmethod
+    def parse_s3_region(cls, v: Any, info: Any) -> str:
+        if v and str(v).strip():
+            return str(v).strip()
+        import os
+        return os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION", "us-east-1")).strip()
+
     # --- Clerk Authentication ---
     CLERK_SECRET_KEY: str = ""
     CLERK_PUBLISHABLE_KEY: str = ""
@@ -78,7 +94,7 @@ class Settings(BaseSettings):
     # --- AI Providers (Interface-based) ---
     # Active LLM provider: groq | ollama | openai | anthropic | gemini
     LLM_PROVIDER: str = "groq"
-    LLM_MODEL: str = "llama-3.3-70b-versatile"
+    LLM_MODEL: str = "groq/compound-mini"
 
     # Active embedding provider: ollama | openai | gemini | huggingface
     EMBEDDING_PROVIDER: str = "ollama"

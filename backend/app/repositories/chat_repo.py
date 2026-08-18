@@ -3,9 +3,10 @@ BetterBee — Chat Repository.
 """
 
 import uuid
+
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.chat import ChatSession, Message
 from app.repositories.base import BaseRepository

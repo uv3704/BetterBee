@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { UserProfile } from "@/services/auth-service";
-
 export interface Workspace {
   id: string;
   name: string;

@@ -4,7 +4,8 @@ BetterBee — User Schemas.
 
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 class UserBase(BaseModel):
@@ -30,12 +31,11 @@ class UserSyncRequest(UserBase):
 
 
 class UserResponse(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     clerk_id: str
     role: str
     is_active: bool
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True

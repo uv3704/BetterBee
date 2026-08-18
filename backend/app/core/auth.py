@@ -22,7 +22,7 @@ _jwks_cache: dict = {}
 async def _fetch_jwks(jwks_url: str) -> dict:
     """Fetch JSON Web Key Set from Clerk."""
     global _jwks_cache
-    if _jwks_cache:
+    if _jwks_cache and "keys" in _jwks_cache:
         return _jwks_cache
 
     if not jwks_url:
@@ -31,7 +31,7 @@ async def _fetch_jwks(jwks_url: str) -> dict:
 
     try:
         logger.info("Fetching JWKS from Clerk", url=jwks_url)
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(jwks_url)
             response.raise_for_status()
             _jwks_cache = response.json()
@@ -39,6 +39,13 @@ async def _fetch_jwks(jwks_url: str) -> dict:
     except Exception as e:
         logger.error("Failed to fetch Clerk JWKS", error=str(e))
         return {}
+
+
+async def prefetch_jwks() -> None:
+    """Pre-warm JWKS cache during application startup."""
+    settings = get_settings()
+    if settings.CLERK_JWKS_URL:
+        await _fetch_jwks(settings.CLERK_JWKS_URL)
 
 
 async def verify_clerk_token(token: str) -> str:
@@ -115,7 +122,7 @@ async def verify_clerk_token(token: str) -> str:
 
     except JWTError as e:
         logger.warning("JWT verification failed", error=str(e))
-        raise AuthenticationError(f"Invalid authentication token: {str(e)}")
+        raise AuthenticationError(f"Invalid authentication token: {e!s}")
     except Exception as e:
         logger.error("Authentication error during token verification", error=str(e))
         raise AuthenticationError("Authentication failed")

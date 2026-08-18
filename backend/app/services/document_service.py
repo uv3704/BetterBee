@@ -2,12 +2,13 @@
 BetterBee — Document Service.
 """
 
-import uuid
 import os
-from datetime import datetime, timezone
+import uuid
+from datetime import UTC, datetime
+from typing import Any
+
 import structlog
 
-from typing import Any
 from app.core.exceptions import ForbiddenError, NotFoundError
 from app.models.document import Document
 from app.repositories.document_repo import DocumentRepository
@@ -118,9 +119,9 @@ class DocumentService:
             process_document.delay(str(document_id))
             document = await self._document_repo.update(document, status="uploaded")
         else:
-            # Use FastAPI BackgroundTasks
+            # Use FastAPI BackgroundTasks with an independent async DB session
             if background_tasks:
-                background_tasks.add_task(self.ingest_document, document_id)
+                background_tasks.add_task(_run_background_ingestion, document_id)
                 document = await self._document_repo.update(document, status="uploaded")
             else:
                 # Synchronous fallback if run outside web request
@@ -177,19 +178,19 @@ class DocumentService:
             embedding_provider = EmbeddingFactory.create()
 
             chunk_texts = [c["content"] for c in chunks]
-            
+
             import time
             start_embed = time.perf_counter()
             embeddings = await embedding_provider.embed_batch(chunk_texts)
             embed_time = time.perf_counter() - start_embed
             embed_time_ms = int(embed_time * 1000)
-            
+
             embed_model_name = getattr(embedding_provider, 'model', 'BAAI/bge-small-en-v1.5')
             if hasattr(embedding_provider, 'model_name') and isinstance(embedding_provider.model_name, str):
                 embed_model_name = embedding_provider.model_name
             if "/" in embed_model_name:
                 embed_model_name = embed_model_name.split("/")[-1]
-                
+
             print(f"🧠 Embeddings\n"
                   f"────────────────────────────\n"
                   f"Model     {embed_model_name}\n"
@@ -197,8 +198,8 @@ class DocumentService:
                   f"Time      {embed_time_ms} ms")
 
             # 5. Save chunks to DB & ChromaDB
-            from app.repositories.chunk_repo import ChunkRepository
             from app.rag.factory import VectorStoreFactory
+            from app.repositories.chunk_repo import ChunkRepository
 
             chunk_repo = ChunkRepository(self._document_repo._session)
             vector_store = VectorStoreFactory.create()
@@ -250,7 +251,7 @@ class DocumentService:
                 embeddings=chroma_embeddings,
                 metadatas=chroma_metadatas,
             )
-            
+
             workspace_obj = await self._workspace_repo.get_by_id(document.workspace_id)
             workspace_slug = workspace_obj.slug if workspace_obj else collection_name
             print(f"🗂 Index\n"
@@ -312,12 +313,51 @@ class DocumentService:
         return await self._storage_provider.generate_download_url(document.s3_key, base_url=base_url)
 
     async def delete_document(self, document_id: uuid.UUID, user_id: uuid.UUID) -> None:
-        """Soft delete a document from the workspace."""
+        """Soft delete a document from the workspace, delete its file from S3 storage, and delete its vectors from ChromaDB."""
         document = await self.get_document_by_id(document_id, user_id)
 
-        # Soft delete in database
+        # 1. Delete raw file from S3 / storage provider
+        try:
+            if document.s3_key:
+                await self._storage_provider.delete_object(document.s3_key)
+                logger.info("Deleted document file from S3 storage", s3_key=document.s3_key, document_id=str(document_id))
+        except Exception as e:
+            logger.warning("Failed to delete object from storage during document deletion", error=str(e), s3_key=document.s3_key)
+
+        # 2. Delete vectors from ChromaDB collection
+        try:
+            from app.rag.factory import VectorStoreFactory
+            vector_store = VectorStoreFactory.create()
+            await vector_store.delete(
+                collection_name=str(document.workspace_id),
+                document_id=str(document.id),
+            )
+            logger.info("Deleted document vectors from vector store", document_id=str(document_id))
+        except Exception as e:
+            logger.warning("Failed to delete vectors from vector store during document deletion", error=str(e))
+
+        # 3. Soft delete in database
         logger.info("Soft-deleting document in database", document_id=document_id)
         await self._document_repo.update(
             document,
-            deleted_at=datetime.now(timezone.utc),
+            deleted_at=datetime.now(UTC),
         )
+
+
+async def _run_background_ingestion(document_id: uuid.UUID) -> None:
+    """Independent background runner that creates its own session to prevent closed-session errors."""
+    from app.db.engine import async_session_factory
+    from app.services.storage_service import get_storage_provider
+
+    async with async_session_factory() as session:
+        try:
+            document_repo = DocumentRepository(session)
+            workspace_repo = WorkspaceRepository(session)
+            storage_provider = get_storage_provider()
+            service = DocumentService(document_repo, workspace_repo, storage_provider)
+            await service.ingest_document(document_id)
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.error("Background ingestion runner failed", document_id=str(document_id), error=str(e))
+

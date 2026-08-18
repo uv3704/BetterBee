@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from typing import List
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class DocumentStatusCount(BaseModel):
     status: str
@@ -31,6 +32,6 @@ class RAGAnalyticsResponse(BaseModel):
     total_queries: int
     total_tokens: int
     avg_latency_ms: float
-    document_statuses: List[DocumentStatusCount]
-    recent_queries: List[RecentQuery]
-    recent_uploads: List[RecentUpload]
+    document_statuses: list[DocumentStatusCount]
+    recent_queries: list[RecentQuery]
+    recent_uploads: list[RecentUpload]

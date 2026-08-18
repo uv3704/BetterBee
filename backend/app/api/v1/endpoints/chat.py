@@ -4,17 +4,18 @@ BetterBee — Chat & RAG Streaming API Endpoints.
 
 import json
 import uuid
+
 import structlog
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from fastapi.responses import StreamingResponse
 
-from app.core.deps import CurrentUser, ChatServiceDep, RAGPipelineDep
+from app.core.deps import ChatServiceDep, CurrentUser, RAGPipelineDep
 from app.schemas.chat import (
     ChatRequest,
-    ChatSessionResponse,
-    ChatSessionDetailResponse,
-    ChatSessionUpdate,
     ChatSessionCreate,
+    ChatSessionDetailResponse,
+    ChatSessionResponse,
+    ChatSessionUpdate,
 )
 
 logger = structlog.get_logger(__name__)
@@ -49,7 +50,7 @@ async def send_chat_message(
         if is_new:
             # Yield the session_id first so the client can navigate to the new session
             yield f"data: {json.dumps({'type': 'session_id', 'content': str(session_id)})}\n\n"
-        
+
         async for event in chat_service.send_message(
             session_id=session_id,
             user_id=current_user.id,
@@ -156,9 +157,9 @@ async def get_message_explainability(
         if msg.id == message_id:
             message = msg
             break
-            
+
     if not message:
         from app.core.exceptions import NotFoundError
         raise NotFoundError("Message", str(message_id))
-        
+
     return message.explainability_data

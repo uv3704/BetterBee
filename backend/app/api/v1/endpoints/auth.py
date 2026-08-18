@@ -3,7 +3,7 @@ BetterBee — Authentication & Sync Endpoints.
 """
 
 import structlog
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from app.core.deps import CurrentUserId, UserServiceDep
 from app.core.exceptions import AuthenticationError, NotFoundError

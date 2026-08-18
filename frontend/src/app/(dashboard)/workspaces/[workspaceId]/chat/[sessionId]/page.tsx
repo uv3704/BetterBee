@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import { chatService, type Message } from "@/services/chat-service";
+import { chatService, type Message, type ExplainabilityData } from "@/services/chat-service";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ExplainabilityPanel } from "@/components/explainability/explainability-panel";
@@ -16,7 +16,6 @@ import { UploadDialog } from "@/components/documents/upload-dialog";
 export default function ChatSessionPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
 
@@ -26,31 +25,27 @@ export default function ChatSessionPage() {
 
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
   const [streamingMessage, setStreamingMessage] = useState<Message | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Explainability Panel State
   const [isExplainOpen, setIsExplainOpen] = useState(false);
-  const [explainData, setExplainData] = useState<any>(null);
+  const [explainData, setExplainData] = useState<ExplainabilityData | null>(null);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const initialHandledRef = useRef(false);
 
   // Fetch session messages
   const { data: session, isLoading } = useQuery({
     queryKey: ["chat-session", sessionId],
     queryFn: () => chatService.getSession(workspaceId, sessionId, getToken),
-    enabled: !!sessionId,
+    enabled: Boolean(sessionId),
   });
 
-  // Sync React Query messages to local state when loaded
-  useEffect(() => {
-    if (session?.messages) {
-      setLocalMessages(session.messages);
-    }
-  }, [session]);
+  const messages = [...(session?.messages || []), ...optimisticMessages];
 
   // Handle scroll events to show/hide scroll-to-bottom button
   const handleScroll = () => {
@@ -77,17 +72,17 @@ export default function ChatSessionPage() {
     if (streamingMessage) {
       scrollToBottom();
     }
-  }, [streamingMessage?.content]);
+  }, [streamingMessage]);
 
-  // Auto-scroll on initial load
+  // Auto-scroll on initial load or new messages
   useEffect(() => {
-    if (localMessages.length > 0) {
+    if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [localMessages.length]);
+  }, [messages.length]);
 
   // Handle sending a message
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isSending) return;
 
     setIsSending(true);
@@ -106,7 +101,7 @@ export default function ChatSessionPage() {
       created_at: new Date().toISOString(),
     };
 
-    setLocalMessages((prev) => [...prev, userMsg]);
+    setOptimisticMessages((prev) => [...prev, userMsg]);
 
     // 2. Initialize local streaming assistant message
     const assistantMsgId = `assistant-${Date.now()}`;
@@ -134,22 +129,22 @@ export default function ChatSessionPage() {
         if (event.type === "token") {
           setStreamingMessage((prev) => {
             if (!prev) return null;
-            return { ...prev, content: prev.content + event.content };
+            return { ...prev, content: prev.content + (typeof event.content === "string" ? event.content : "") };
           });
         } else if (event.type === "citations") {
           setStreamingMessage((prev) => {
             if (!prev) return null;
-            return { ...prev, citations: event.content };
+            return { ...prev, citations: Array.isArray(event.content) ? event.content : [] };
           });
         } else if (event.type === "explain") {
           setStreamingMessage((prev) => {
             if (!prev) return null;
-            return { ...prev, explainability_data: event.content };
+            return { ...prev, explainability_data: event.content as ExplainabilityData };
           });
         } else if (event.type === "message_id") {
           setStreamingMessage((prev) => {
             if (!prev) return null;
-            return { ...prev, id: event.content };
+            return { ...prev, id: String(event.content) };
           });
         }
       },
@@ -164,22 +159,24 @@ export default function ChatSessionPage() {
         queryClient.invalidateQueries({ queryKey: ["chat-session", sessionId] });
         queryClient.invalidateQueries({ queryKey: ["chat-sessions", workspaceId] });
         setStreamingMessage(null);
+        setOptimisticMessages([]);
         setIsSending(false);
       }
     );
-  };
+  }, [isSending, sessionId, workspaceId, getToken, queryClient]);
 
   // Catch initialMessage redirect and execute it
   useEffect(() => {
-    if (initialMessage && localMessages.length === 0 && !isLoading && !isSending) {
+    if (initialMessage && !initialHandledRef.current && !isLoading) {
+      initialHandledRef.current = true;
       // Clean up search query param from URL
       const url = new URL(window.location.href);
       url.searchParams.delete("initialMessage");
       window.history.replaceState({}, "", url.pathname);
-      
-      handleSendMessage(decodeURIComponent(initialMessage));
+
+      void handleSendMessage(initialMessage);
     }
-  }, [initialMessage, localMessages.length, isLoading]);
+  }, [initialMessage, isLoading, handleSendMessage]);
 
   const handleOpenExplain = (message: Message) => {
     if (selectedMessageId === message.id && isExplainOpen) {
@@ -188,7 +185,7 @@ export default function ChatSessionPage() {
       setExplainData(null);
     } else {
       setSelectedMessageId(message.id);
-      setExplainData(message.explainability_data);
+      setExplainData(message.explainability_data || null);
       setIsExplainOpen(true);
     }
   };
@@ -196,33 +193,34 @@ export default function ChatSessionPage() {
   return (
     <div className="flex-1 flex overflow-hidden h-full relative">
       {/* Active Conversation thread */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-neutral-950">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-[#121316]">
         
         {/* Messages List Area */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-6 py-8 space-y-6 custom-scrollbar"
+          className="flex-1 overflow-y-auto px-4 sm:px-6 pt-6 pb-12 space-y-5 custom-scrollbar"
         >
-          {isLoading && localMessages.length === 0 ? (
-            <div className="flex flex-col h-full items-center justify-center text-center space-y-3">
-              <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-              <span className="text-sm text-neutral-500 font-semibold">Loading conversation thread...</span>
+          {isLoading && messages.length === 0 ? (
+            <div className="flex flex-col h-full items-center justify-center text-center space-y-2">
+              <Loader2 className="h-6 w-6 animate-spin text-[#8b8e9b]" />
+              <span className="text-xs text-[#8b8e9b]">Loading conversation...</span>
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-5">
               <AnimatePresence initial={false}>
-                {localMessages.map((msg) => (
+                {messages.map((msg: Message) => (
                   <motion.div
                     key={msg.id}
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.2 }}
                   >
                     <MessageBubble
                       message={msg}
                       onOpenExplain={handleOpenExplain}
                       isExplainOpen={selectedMessageId === msg.id && isExplainOpen}
+                      onSendMessage={handleSendMessage}
                     />
                   </motion.div>
                 ))}
@@ -230,13 +228,14 @@ export default function ChatSessionPage() {
                 {/* Streaming Assistant Message */}
                 {streamingMessage && (
                   <motion.div
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
                     <MessageBubble
                       message={streamingMessage}
                       onOpenExplain={handleOpenExplain}
                       isExplainOpen={selectedMessageId === streamingMessage.id && isExplainOpen}
+                      onSendMessage={handleSendMessage}
                     />
                   </motion.div>
                 )}
@@ -249,14 +248,14 @@ export default function ChatSessionPage() {
         {showScrollButton && (
           <button
             onClick={scrollToBottom}
-            className="absolute bottom-24 right-10 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 border border-neutral-800 text-amber-500 hover:text-amber-400 shadow-md hover:scale-105 transition-all cursor-pointer"
+            className="absolute bottom-24 right-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#18191f] border border-[#272935] text-[#b0b3c1] hover:text-[#f4f4f6] shadow-sm transition-colors cursor-pointer z-10"
           >
-            <ArrowDown className="h-4 w-4" />
+            <ArrowDown className="h-3.5 w-3.5" />
           </button>
         )}
 
         {/* Input Panel */}
-        <div className="px-6 pb-6 pt-4 border-t border-neutral-900 bg-neutral-950/80 backdrop-blur-xs max-w-4xl mx-auto w-full">
+        <div className="px-4 sm:px-6 pb-6 pt-3 border-t border-[#23252d] bg-[#121316] max-w-6xl mx-auto w-full">
           <ChatInput
             value={inputValue}
             onChange={setInputValue}

@@ -3,9 +3,10 @@ BetterBee — Bypass Reranker.
 """
 
 from typing import Any
+
 import structlog
 
-from app.rag.interfaces.reranker import RerankerProvider, RankedResult
+from app.rag.interfaces.reranker import RankedResult, RerankerProvider
 
 logger = structlog.get_logger(__name__)
 

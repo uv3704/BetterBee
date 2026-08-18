@@ -8,24 +8,17 @@
 "use client";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { useTheme } from "next-themes";
 import type { ReactNode } from "react";
+import { clerkTheme } from "@/lib/clerk-theme";
 
 interface ClerkProviderWrapperProps {
   children: ReactNode;
 }
 
 export function ClerkProviderWrapper({ children }: ClerkProviderWrapperProps) {
-  const { resolvedTheme } = useTheme();
-
   return (
     <ClerkProvider
-      appearance={{
-        variables: {
-          colorPrimary: "#f59e0b", // BetterBee amber/honey
-          borderRadius: "0.5rem",
-        },
-      }}
+      appearance={clerkTheme}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignOutUrl="/"

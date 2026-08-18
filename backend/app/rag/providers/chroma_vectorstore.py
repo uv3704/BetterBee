@@ -3,10 +3,11 @@ BetterBee — ChromaDB Vector Store Provider.
 """
 
 from typing import Any
+
 import chromadb
 import structlog
 
-from app.rag.interfaces.vectorstore import VectorStoreProvider, SearchResult
+from app.rag.interfaces.vectorstore import SearchResult, VectorStoreProvider
 
 logger = structlog.get_logger(__name__)
 
@@ -69,7 +70,7 @@ class ChromaVectorStore(VectorStoreProvider):
     ) -> list[SearchResult]:
         try:
             collection = self._get_collection(collection_name)
-            
+
             # Format filters for ChromaDB
             # e.g., if filter is {"document_id": "uuid"}, Chroma accepts it directly as dict
             # For multiple filters: {"$and": [{"prop1": "val1"}, {"prop2": "val2"}]}
@@ -93,7 +94,7 @@ class ChromaVectorStore(VectorStoreProvider):
                     # We convert to a relevance score where higher is better.
                     dist = distances[i] if i < len(distances) else 0.5
                     score = max(0.0, 1.0 - dist)
-                    
+
                     search_results.append(
                         SearchResult(
                             id=ids[i],
@@ -122,3 +123,11 @@ class ChromaVectorStore(VectorStoreProvider):
             logger.error("Failed to delete document from ChromaDB", error=str(e))
             from app.core.exceptions import ProviderError
             raise ProviderError("ChromaDB", str(e))
+
+    async def delete_collection(self, collection_name: str) -> None:
+        try:
+            clean_name = f"{self.collection_prefix}{collection_name}".replace("-", "_")
+            self.client.delete_collection(name=clean_name)
+            logger.info("Deleted ChromaDB collection", collection=clean_name)
+        except Exception as e:
+            logger.warning("Could not delete ChromaDB collection (may not exist)", error=str(e))

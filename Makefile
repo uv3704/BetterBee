@@ -6,20 +6,22 @@
 
 # --- Development ---
 
-dev: infra ## Start all services (Redis + backend + frontend + celery)
+dev: ## Start backend + frontend concurrently
 	@echo "🐝 Starting BetterBee development stack..."
+	@$(MAKE) -j2 backend frontend
+
+dev-all: infra ## Start all services including Redis and Celery
+	@echo "🐝 Starting full BetterBee stack with Celery..."
 	@$(MAKE) -j3 backend frontend celery
 
 backend: ## Start FastAPI backend with hot reload
-	cd backend && source .venv/bin/activate && \
-	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --no-access-log
+	cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 frontend: ## Start Next.js frontend dev server
 	cd frontend && npm run dev
 
 celery: ## Start Celery worker
-	cd backend && source .venv/bin/activate && \
-	celery -A app.workers.celery_app worker -l WARNING --without-gossip --without-mingle --without-heartbeat -Q default,document_processing -c 2
+	cd backend && uv run celery -A app.workers.celery_app worker -l WARNING --without-gossip --without-mingle --without-heartbeat -Q default,document_processing -c 2
 
 # --- Infrastructure ---
 

@@ -6,7 +6,7 @@ Checks connectivity to all critical services: Database, Redis, ChromaDB, AI prov
 """
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from fastapi import APIRouter, status
@@ -142,6 +142,6 @@ async def health_check() -> HealthResponse:
         version=settings.APP_VERSION,
         environment="development" if settings.DEBUG else "production",
         uptime_seconds=int(time.time() - _start_time),
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         services=services,
     )

@@ -5,13 +5,14 @@ Async SQLAlchemy engine and session factory using asyncpg.
 Connection pool sized for MacBook M2 (pool_size=5, max_overflow=10).
 """
 
+from typing import Any
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
 
-from typing import Any
 from app.core.config import get_settings
 
 settings = get_settings()

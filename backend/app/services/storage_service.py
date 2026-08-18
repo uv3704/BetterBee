@@ -6,12 +6,12 @@ Abstracts file storage operations to support both local filesystem storage
 """
 
 import os
-import shutil
 from abc import ABC, abstractmethod
 from typing import Any
+
 import boto3
-from botocore.config import Config
 import structlog
+from botocore.config import Config
 
 from app.core.config import get_settings
 
@@ -32,18 +32,8 @@ class StorageProvider(ABC):
         pass
 
     @abstractmethod
-    async def delete_object(self, key: str) -> None:
-        """Delete an object from storage."""
-        pass
-
-    @abstractmethod
-    async def get_object(self, key: str) -> bytes:
-        """Retrieve an object's raw content bytes."""
-        pass
-
-    @abstractmethod
-    async def upload_object(self, key: str, content: bytes) -> None:
-        """Upload an object directly from memory."""
+    async def delete_prefix(self, prefix: str) -> None:
+        """Delete all objects under a given prefix/folder."""
         pass
 
 
@@ -103,10 +93,22 @@ class S3StorageProvider(StorageProvider):
     async def delete_object(self, key: str) -> None:
         try:
             self.client.delete_object(Bucket=self.bucket, Key=key)
-            logger.debug("Deleted object from S3", key=key)
+            logger.info("Deleted object from S3", key=key)
         except Exception as e:
             logger.error("Failed to delete object from S3", error=str(e), key=key)
             raise
+
+    async def delete_prefix(self, prefix: str) -> None:
+        try:
+            paginator = self.client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+                if "Contents" in page:
+                    delete_objects = [{"Key": obj["Key"]} for obj in page["Contents"]]
+                    if delete_objects:
+                        self.client.delete_objects(Bucket=self.bucket, Delete={"Objects": delete_objects})
+            logger.info("Deleted all S3 objects under prefix", prefix=prefix)
+        except Exception as e:
+            logger.warning("Failed to delete objects under S3 prefix", prefix=prefix, error=str(e))
 
     async def get_object(self, key: str) -> bytes:
         try:
@@ -140,8 +142,6 @@ class LocalStorageProvider(StorageProvider):
         return os.path.join(self.storage_dir, safe_key)
 
     async def generate_upload_url(self, key: str, expires_in: int = 3600, base_url: str | None = None) -> str:
-        # Return local API endpoint path
-        # Frontend will resolve this relative to the API URL or we construct full url
         settings = get_settings()
         resolved_base = base_url or settings.API_BASE_URL or "http://localhost:8000"
         resolved_base = resolved_base.rstrip("/")
@@ -157,7 +157,16 @@ class LocalStorageProvider(StorageProvider):
         path = self._get_path(key)
         if os.path.exists(path):
             os.remove(path)
-            logger.debug("Deleted local file", path=path)
+            logger.info("Deleted local file", path=path)
+
+    async def delete_prefix(self, prefix: str) -> None:
+        # Local mock implementation
+        safe_prefix = os.path.basename(prefix)
+        for fname in os.listdir(self.storage_dir):
+            if fname.startswith(safe_prefix):
+                fpath = os.path.join(self.storage_dir, fname)
+                if os.path.isfile(fpath):
+                    os.remove(fpath)
 
     async def get_object(self, key: str) -> bytes:
         path = self._get_path(key)

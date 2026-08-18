@@ -4,7 +4,8 @@ BetterBee — Workspace Schemas.
 
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class WorkspaceBase(BaseModel):
@@ -24,12 +25,11 @@ class WorkspaceUpdate(BaseModel):
 
 
 class WorkspaceResponse(WorkspaceBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     slug: str
     owner_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
     document_count: int = 0  # Helpful for UI dashboard
-
-    class Config:
-        from_attributes = True

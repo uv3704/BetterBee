@@ -4,12 +4,13 @@ BetterBee — Chat Schemas.
 
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class MessageBase(BaseModel):
-    role: str = Field(..., description="user | assistant")
-    content: str
+    role: str = Field(..., pattern="^(user|assistant|system)$")
+    content: str = Field(..., min_length=1)
 
 
 class MessageCreate(MessageBase):
@@ -17,6 +18,8 @@ class MessageCreate(MessageBase):
 
 
 class MessageResponse(MessageBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     session_id: uuid.UUID
     citations: list = []
@@ -26,9 +29,6 @@ class MessageResponse(MessageBase):
     provider: str | None = None
     latency_ms: int
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ChatSessionBase(BaseModel):
@@ -46,14 +46,13 @@ class ChatSessionUpdate(BaseModel):
 
 
 class ChatSessionResponse(ChatSessionBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     workspace_id: uuid.UUID
     user_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ChatSessionDetailResponse(ChatSessionResponse):

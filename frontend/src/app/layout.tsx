@@ -4,8 +4,8 @@ import "./globals.css";
 
 // Suppress Clerk development keys warnings in terminal console
 if (typeof window !== "undefined") {
-  const filterClerkLog = (originalFn: (...args: any[]) => void) => {
-    return (...args: any[]) => {
+  const filterClerkLog = (originalFn: (...args: unknown[]) => void) => {
+    return (...args: unknown[]) => {
       if (
         args[0] &&
         typeof args[0] === "string" &&

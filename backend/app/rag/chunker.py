@@ -6,9 +6,10 @@ Preserves page/sheet/slide metadata during splitting.
 """
 
 from typing import Any
+
 import structlog
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document as LCDocument
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.core.config import get_settings
 
@@ -22,7 +23,7 @@ class Chunker:
         settings = get_settings()
         self.chunk_size = chunk_size or settings.CHUNK_SIZE
         self.chunk_overlap = chunk_overlap or settings.CHUNK_OVERLAP
-        
+
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,
             chunk_overlap=self.chunk_overlap,
@@ -41,44 +42,50 @@ class Chunker:
         page_metadata: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """
-        Splits raw text into metadata-aware chunks.
+        Splits raw text into metadata-aware chunks with Parent-Child context preservation.
         
-        If page_metadata contains multiple entries (e.g., PDF pages or Excel sheets),
-        each page is chunked individually to preserve page number context.
+        Each chunk contains:
+        - `content`: Small-to-medium chunk for precise vector embedding.
+        - `metadata.parent_content`: Broader surrounding section for full LLM synthesis.
         """
-        # If we only have 1 page/metadata entry, split the whole text
-        if len(page_metadata) <= 1:
-            meta = page_metadata[0] if page_metadata else {}
-            lc_docs = [LCDocument(page_content=text, metadata=meta)]
-            split_docs = self.splitter.split_documents(lc_docs)
-        else:
-            # We have page-by-page breakdowns (e.g., PDFs)
-            # We split the text roughly by double newline or reconstruct it.
-            # A simple approach: split pages, assign metadata, chunk each page
-            pages = text.split("\n\n")
-            
-            # Pad or trim pages to match metadata length
-            lc_docs = []
-            for i, page_text in enumerate(pages):
-                if i < len(page_metadata):
-                    meta = page_metadata[i]
-                else:
-                    meta = page_metadata[-1] if page_metadata else {}
-                
-                if page_text.strip():
-                    lc_docs.append(LCDocument(page_content=page_text, metadata=meta))
-            
-            split_docs = self.splitter.split_documents(lc_docs)
+        lc_docs = []
+        if page_metadata:
+            for item in page_metadata:
+                page_text = item.get("text", "")
+                if not page_text.strip():
+                    continue
+                meta = {k: v for k, v in item.items() if k != "text"}
+                lc_docs.append(LCDocument(page_content=page_text, metadata=meta))
 
-        # Convert LangChain documents to simple dicts
+        # Fallback if no page metadata or empty docs
+        if not lc_docs and text.strip():
+            lc_docs = [LCDocument(page_content=text, metadata={})]
+
+        split_docs = self.splitter.split_documents(lc_docs)
+
         chunks = []
+        total_docs = len(split_docs)
+
         for idx, doc in enumerate(split_docs):
+            # Compute parent context window (preceding + current + following chunk)
+            prev_content = split_docs[idx - 1].page_content if idx > 0 else ""
+            next_content = split_docs[idx + 1].page_content if idx < total_docs - 1 else ""
+            
+            parent_parts = [p for p in [prev_content, doc.page_content, next_content] if p]
+            parent_context = "\n\n".join(parent_parts)
+
+            chunk_meta = {
+                **doc.metadata,
+                "parent_content": parent_context,
+                "chunk_index": idx,
+            }
+
             chunks.append({
                 "chunk_index": idx,
                 "content": doc.page_content,
-                "token_count": len(doc.page_content.split()),  # Simple word count approximation
-                "metadata": doc.metadata,
+                "token_count": len(doc.page_content.split()),
+                "metadata": chunk_meta,
             })
-            
-        logger.debug("Document chunking complete", total_chunks=len(chunks))
+
+        logger.debug("Document chunking complete with parent context", total_chunks=len(chunks))
         return chunks

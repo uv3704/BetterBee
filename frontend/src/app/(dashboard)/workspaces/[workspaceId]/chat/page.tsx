@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { chatService } from "@/services/chat-service";
@@ -15,13 +15,16 @@ import { UploadDialog } from "@/components/documents/upload-dialog";
 export default function ChatLandingPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
-  
+
   const workspaceId = params.workspaceId as string;
+  const initialMessage = searchParams.get("initialMessage");
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const initialHandledRef = useRef(false);
 
   const createSessionMutation = useMutation({
     mutationFn: (message: string) => chatService.createSession(workspaceId, getToken, message.slice(0, 40)),
@@ -32,7 +35,7 @@ export default function ChatLandingPage() {
     }
   });
 
-  const handleSendMessage = async (messageText: string) => {
+  const handleSendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -45,7 +48,14 @@ export default function ChatLandingPage() {
         );
       },
     });
-  };
+  }, [isSubmitting, createSessionMutation, queryClient, workspaceId, router]);
+
+  useEffect(() => {
+    if (initialMessage && !initialHandledRef.current) {
+      initialHandledRef.current = true;
+      void handleSendMessage(initialMessage);
+    }
+  }, [initialMessage, handleSendMessage]);
 
   const suggestions = [
     {
@@ -75,35 +85,35 @@ export default function ChatLandingPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full items-center justify-between p-6 max-w-4xl mx-auto w-full select-none">
+    <div className="flex-1 flex flex-col h-full items-center justify-between p-4 sm:p-6 max-w-6xl mx-auto w-full select-none pb-8">
       {/* Spacer or flex filler */}
-      <div className="flex-1 flex flex-col items-center justify-center space-y-8 w-full">
+      <div className="flex-1 flex flex-col items-center justify-center space-y-6 sm:space-y-8 w-full py-4">
         {/* Logo/Hero area */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center text-center space-y-4"
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center text-center space-y-2.5"
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 shadow-lg shadow-amber-500/5 animate-pulse">
-            <BeeIcon className="h-10 w-10 text-amber-500" />
+          <div className="flex h-10 w-10 items-center justify-center rounded bg-[#18191f] border border-[#272935] text-[#d48b38]">
+            <BeeIcon className="h-5 w-5" />
           </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-neutral-100 sm:text-4xl bg-gradient-to-r from-neutral-100 via-neutral-200 to-neutral-400 bg-clip-text">
-              What knowledge can I retrieve?
+          <div className="space-y-1">
+            <h1 className="text-xl font-medium tracking-tight text-[#f4f4f6] sm:text-2xl">
+              Ask anything about your documents
             </h1>
-            <p className="text-sm text-neutral-400 max-w-md mx-auto leading-relaxed">
-              BetterBee searches, reranks, and synthesizes answers strictly grounded in your workspace document corpus.
+            <p className="text-xs text-[#8b8e9b] max-w-md mx-auto leading-relaxed">
+              BetterBee retrieves matching sections from your uploaded files and provides answers with exact page citations.
             </p>
           </div>
         </motion.div>
 
         {/* Suggestions Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full pt-4"
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full pt-1"
         >
           {suggestions.map((s, idx) => {
             const Icon = s.icon;
@@ -112,16 +122,16 @@ export default function ChatLandingPage() {
                 key={idx}
                 onClick={() => handleSendMessage(s.prompt)}
                 disabled={isSubmitting}
-                className="flex items-start text-left gap-4 p-4 rounded-2xl border border-neutral-800/40 bg-neutral-900/10 hover:bg-neutral-900/40 hover:border-neutral-800 transition-all group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-start text-left gap-3 p-3.5 rounded-lg border border-[#23252d] bg-[#18191f] hover:bg-[#1f212a] hover:border-[#2f3240] transition-colors group cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-950 border border-neutral-900 text-neutral-400 group-hover:text-amber-500 group-hover:border-amber-500/20 transition-all shadow-xs">
-                  <Icon className="h-4 w-4" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#14151a] border border-[#272935] text-[#8b8e9b] group-hover:text-[#d48b38] transition-colors">
+                  <Icon className="h-3.5 w-3.5" />
                 </div>
-                <div className="space-y-1">
-                  <span className="text-xs font-semibold text-neutral-200 group-hover:text-amber-400 transition-colors">
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-xs font-medium text-[#eaebee] group-hover:text-[#f4f4f6] transition-colors block">
                     {s.title}
                   </span>
-                  <p className="text-[11px] text-neutral-500 leading-normal">
+                  <p className="text-[11px] text-[#8b8e9b] leading-normal line-clamp-1">
                     {s.desc}
                   </p>
                 </div>
@@ -133,15 +143,15 @@ export default function ChatLandingPage() {
 
       {/* Input area */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full pt-6 sticky bottom-0 bg-neutral-950/20 backdrop-blur-xs pb-4"
+        transition={{ duration: 0.3, delay: 0.15 }}
+        className="w-full pt-4 sticky bottom-0 bg-[#121316] pb-2"
       >
         {isSubmitting ? (
-          <div className="flex items-center justify-center gap-2 py-4 text-xs font-semibold text-amber-500/80 bg-neutral-900/20 border border-neutral-800/40 rounded-2xl">
-            <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
-            <span>Initializing session and searching document context...</span>
+          <div className="flex items-center justify-center gap-2 py-3 text-xs font-medium text-[#8b8e9b] bg-[#18191f] border border-[#23252d] rounded-lg">
+            <Loader2 className="h-4 w-4 animate-spin text-[#d48b38]" />
+            <span>Searching document context...</span>
           </div>
         ) : (
           <ChatInput

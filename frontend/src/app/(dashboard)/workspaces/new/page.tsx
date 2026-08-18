@@ -53,30 +53,30 @@ export default function NewWorkspacePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 py-4">
+    <div className="max-w-2xl mx-auto space-y-6 py-4">
       <div className="flex items-center gap-4">
         <Link
           href="/workspaces"
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded border border-[#272935] bg-[#18191f] hover:bg-[#1f212a] text-[#8b8e9b] hover:text-[#eaebee] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-100">
+          <h1 className="text-xl font-medium tracking-tight text-[#f4f4f6]">
             Create Workspace
           </h1>
-          <p className="text-sm text-neutral-400 mt-1">
-            Set up a separate environment for your team's knowledge
+          <p className="text-xs text-[#8b8e9b]">
+            Set up an isolated knowledge environment for your team.
           </p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-8 shadow-2xl backdrop-blur-md relative">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-4 gap-6">
+      <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-6 shadow-xs relative">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-4 gap-4">
             {/* Icon Picker */}
-            <div className="col-span-1 space-y-2">
-              <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider block">
+            <div className="col-span-1 space-y-1.5">
+              <label className="text-xs font-medium text-[#8b8e9b] block">
                 Icon
               </label>
               <input
@@ -84,63 +84,63 @@ export default function NewWorkspacePage() {
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
                 maxLength={2}
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-lg py-2 text-center text-2xl focus:outline-hidden focus:border-amber-500/50"
+                className="w-full bg-[#14151a] border border-[#272935] rounded px-3 py-2 text-center text-lg focus:outline-hidden focus:border-[#3d4152] text-[#eaebee]"
               />
             </div>
 
             {/* Name */}
-            <div className="col-span-3 space-y-2">
-              <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider block">
+            <div className="col-span-3 space-y-1.5">
+              <label className="text-xs font-medium text-[#8b8e9b] block">
                 Workspace Name
               </label>
               <input
                 type="text"
-                placeholder="e.g. Finance, Engineering"
+                placeholder="e.g. Legal, Finance, Engineering"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={100}
                 required
-                className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-lg py-2 px-3 text-sm focus:outline-hidden focus:border-amber-500/50 placeholder:text-neutral-600"
+                className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-2 text-xs sm:text-sm focus:outline-hidden focus:border-[#3d4152] placeholder:text-[#6c6f80]"
               />
             </div>
           </div>
 
           {/* Description */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider block">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#8b8e9b] block">
               Description
             </label>
             <textarea
               placeholder="Provide a brief overview of what this workspace contains..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              rows={3}
               maxLength={255}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-lg py-2 px-3 text-sm focus:outline-hidden focus:border-amber-500/50 placeholder:text-neutral-600 resize-none"
+              className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-2 text-xs sm:text-sm focus:outline-hidden focus:border-[#3d4152] placeholder:text-[#6c6f80] resize-none"
             />
           </div>
 
           {/* Submit */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-900">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#23252d]">
             <Link
               href="/workspaces"
-              className="px-4 py-2 text-sm font-semibold rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-neutral-200 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium rounded border border-[#272935] bg-[#14151a] text-[#8b8e9b] hover:text-[#eaebee] transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-neutral-950 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded bg-[#f4f4f6] hover:bg-[#eaebee] text-[#121316] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
             >
               {createMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   <span>Creating...</span>
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4" />
+                  <Save className="h-3.5 w-3.5" />
                   <span>Create Workspace</span>
                 </>
               )}

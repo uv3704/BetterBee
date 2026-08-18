@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #121316;
+  --foreground: #eaebee;
+  --muted: #8b8e9b;
+  --border: #23252d;
+  --card: #18191f;
+  --accent: #d48b38;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #121316;
+  color: #eaebee;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2c36;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #393c4a;
+}
+
+/* ==========================================================================
+   Clerk Auth Component Visibility Overrides
+   ========================================================================== */
+
+.cl-card,
+.cl-cardBox {
+  background-color: #17181f !important;
+  border: 1px solid #282a36 !important;
+  border-radius: 0.75rem !important;
+}
+
+.cl-headerTitle {
+  color: #f4f4f6 !important;
+  font-weight: 600 !important;
+}
+
+.cl-headerSubtitle {
+  color: #8b8e9b !important;
+}
+
+.cl-socialButtonsBlockButton {
+  background-color: #1f212c !important;
+  border: 1px solid #36394a !important;
+  color: #f4f4f6 !important;
+  border-radius: 0.5rem !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background-color: #282b3a !important;
+  border-color: #484c63 !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: #f4f4f6 !important;
+  font-weight: 500 !important;
+}
+
+.cl-socialButtonsIconButton {
+  background-color: #1f212c !important;
+  border: 1px solid #36394a !important;
+  color: #f4f4f6 !important;
+  border-radius: 0.5rem !important;
+}
+
+.cl-socialButtonsIconButton:hover {
+  background-color: #282b3a !important;
+  border-color: #484c63 !important;
+}
+
+.cl-dividerLine {
+  background-color: #282a36 !important;
+}
+
+.cl-dividerText {
+  color: #8b8e9b !important;
+  background-color: #17181f !important;
+}
+
+.cl-formFieldLabel {
+  color: #c8cbdb !important;
+}
+
+.cl-formFieldInput {
+  background-color: #121317 !important;
+  border: 1px solid #2c2f3d !important;
+  color: #f4f4f6 !important;
+  border-radius: 0.5rem !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: #d48b38 !important;
+}
+
+.cl-formButtonPrimary {
+  background-color: #f4f4f6 !important;
+  color: #121316 !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background-color: #ffffff !important;
+}
+
+.cl-footerActionText {
+  color: #8b8e9b !important;
+}
+
+.cl-footerActionLink {
+  color: #d48b38 !important;
+}
+
+.cl-footerActionLink:hover {
+  text-decoration: underline !important;
+}
+

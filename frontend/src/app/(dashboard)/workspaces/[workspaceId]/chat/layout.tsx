@@ -1,18 +1,16 @@
 "use client";
 
 import React from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { chatService } from "@/services/chat-service";
-import { documentService } from "@/services/document-service";
 import { SessionList } from "@/components/chat/session-list";
 import { toast } from "sonner";
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const router = useRouter();
-  const pathname = usePathname();
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
   
@@ -26,27 +24,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     queryKey: ["chat-sessions", workspaceId],
     queryFn: () => chatService.listSessions(workspaceId, getToken),
     enabled: !!workspaceId,
-  });
-
-  // Query documents list for workspace context
-  const { data: documents = [] } = useQuery({
-    queryKey: ["documents", workspaceId],
-    queryFn: () => documentService.listDocuments(workspaceId, getToken),
-    enabled: !!workspaceId,
-    refetchInterval: 10000, // Poll documents status in background every 10s
-  });
-
-  // Create new session mutation (if triggered directly from UI list)
-  const createSessionMutation = useMutation({
-    mutationFn: () => chatService.createSession(workspaceId, getToken),
-    onSuccess: (newSession) => {
-      queryClient.invalidateQueries({ queryKey: ["chat-sessions", workspaceId] });
-      router.push(`/workspaces/${workspaceId}/chat/${newSession.id}`);
-    },
-    onError: (err) => {
-      toast.error("Failed to create new chat");
-      console.error(err);
-    }
   });
 
   const renameSessionMutation = useMutation({
@@ -108,11 +85,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden w-full bg-neutral-950 text-neutral-100">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden w-full bg-[#121316] text-[#eaebee]">
       {/* Session Navigation list */}
       <SessionList
         sessions={sessions}
-        documents={documents}
         activeSessionId={sessionId}
         workspaceId={workspaceId}
         onRename={handleRename}

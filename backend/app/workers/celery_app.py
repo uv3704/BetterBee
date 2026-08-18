@@ -5,6 +5,7 @@ Configures Celery with Redis broker and task routing for background document par
 """
 
 from celery import Celery
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -26,6 +27,7 @@ celery_app.conf.update(
 )
 
 from celery.signals import worker_ready
+
 
 @worker_ready.connect
 def on_worker_ready(**kwargs):

@@ -1,21 +1,26 @@
 """
-BetterBee — RAG Retriever.
+BetterBee — Advanced RAG Workspace Retriever.
 
-Retrieves candidate document chunks from ChromaDB and performs optional query expansion.
+Performs:
+1. Multi-query vector embedding and retrieval across ChromaDB.
+2. BM25 sparse keyword ranking.
+3. Reciprocal Rank Fusion (RRF) combining dense + sparse search results.
 """
 
+import asyncio
 import uuid
-import structlog
-from typing import Any
 
+import structlog
+
+from app.rag.hybrid import reciprocal_rank_fusion
 from app.rag.interfaces.embeddings import EmbeddingProvider
-from app.rag.interfaces.vectorstore import VectorStoreProvider, SearchResult
+from app.rag.interfaces.vectorstore import SearchResult, VectorStoreProvider
 
 logger = structlog.get_logger(__name__)
 
 
 class WorkspaceRetriever:
-    """Retrieves document chunks relevant to a user query within a workspace."""
+    """Retrieves document chunks using Hybrid Dense Vector + BM25 with RRF."""
 
     def __init__(
         self,
@@ -30,23 +35,60 @@ class WorkspaceRetriever:
         query: str,
         workspace_id: uuid.UUID,
         top_k: int = 20,
+        expanded_queries: list[str] | None = None,
     ) -> list[SearchResult]:
         """
-        Embed the query and retrieve top_k candidate chunks from ChromaDB.
+        Embed queries, perform vector retrieval, and fuse with BM25 keyword rankings.
         """
-        log = logger.bind(workspace_id=str(workspace_id), query=query)
-        log.debug("Initiating vector retrieval")
-
-        # 1. Generate embedding for query
-        query_vector = await self.embeddings.embed_text(query)
-
-        # 2. Query ChromaDB workspace collection
+        queries_to_search = expanded_queries or [query]
         collection_name = str(workspace_id)
-        results = await self.vector_store.search(
-            collection_name=collection_name,
-            query_embedding=query_vector,
+
+        log = logger.bind(
+            workspace_id=str(workspace_id),
+            query_count=len(queries_to_search),
+        )
+        log.debug("Initiating Advanced RAG hybrid retrieval")
+
+        # 1. Multi-Query Vector Search in Parallel
+        async def _search_single_query(q: str) -> list[SearchResult]:
+            try:
+                q_vec = await self.embeddings.embed_text(q)
+                return await self.vector_store.search(
+                    collection_name=collection_name,
+                    query_embedding=q_vec,
+                    top_k=top_k,
+                )
+            except Exception as e:
+                logger.warning("Single query vector search failed", query=q, error=str(e))
+                return []
+
+        search_tasks = [_search_single_query(q) for q in queries_to_search]
+        search_results_list = await asyncio.gather(*search_tasks)
+
+        # 2. Merge & Deduplicate Vector Candidates
+        seen_ids: set[str] = set()
+        deduped_vector_candidates: list[SearchResult] = []
+
+        for sub_results in search_results_list:
+            for res in sub_results:
+                if res.id not in seen_ids:
+                    seen_ids.add(res.id)
+                    deduped_vector_candidates.append(res)
+
+        if not deduped_vector_candidates:
+            return []
+
+        # 3. Perform BM25 + Vector Hybrid Reciprocal Rank Fusion (RRF)
+        fused_results = reciprocal_rank_fusion(
+            vector_results=deduped_vector_candidates,
+            all_chunks=deduped_vector_candidates,
+            query=query,
             top_k=top_k,
         )
 
-        log.debug("Vector retrieval complete", candidate_count=len(results))
-        return results
+        log.debug(
+            "Advanced RAG hybrid retrieval complete",
+            initial_candidates=len(deduped_vector_candidates),
+            fused_output=len(fused_results),
+        )
+        return fused_results

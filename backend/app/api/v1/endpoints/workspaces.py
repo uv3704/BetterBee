@@ -3,8 +3,9 @@ BetterBee — Workspace API Endpoints.
 """
 
 import uuid
+
 import structlog
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
 from app.core.deps import CurrentUser, WorkspaceServiceDep
 from app.schemas.workspace import (

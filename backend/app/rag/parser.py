@@ -7,10 +7,11 @@ Extracts raw text content from uploaded files depending on the file format (PDF,
 import io
 from abc import ABC, abstractmethod
 from typing import Any
-import pypdf
+
 import docx
 import openpyxl
 import pptx
+import pypdf
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -37,16 +38,18 @@ class PDFParser(DocumentParser):
         logger.debug("Parsing PDF file")
         pdf_file = io.BytesIO(content_bytes)
         reader = pypdf.PdfReader(pdf_file)
-        
+
         extracted_text_parts = []
         page_metadata = []
 
         for page_idx, page in enumerate(reader.pages):
             text = page.extract_text() or ""
-            extracted_text_parts.append(text)
-            page_metadata.append({
-                "page_number": page_idx + 1,
-            })
+            if text.strip():
+                extracted_text_parts.append(text)
+                page_metadata.append({
+                    "page_number": page_idx + 1,
+                    "text": text,
+                })
 
         return "\n\n".join(extracted_text_parts), page_metadata
 
@@ -58,12 +61,11 @@ class DocxParser(DocumentParser):
         logger.debug("Parsing DOCX file")
         docx_file = io.BytesIO(content_bytes)
         doc = docx.Document(docx_file)
-        
+
         paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
         text = "\n\n".join(paragraphs)
-        
-        # Docx does not have clear page numbers, so we return a single metadata block
-        return text, [{"page_number": 1}]
+
+        return text, [{"page_number": 1, "text": text}]
 
 
 class ExcelParser(DocumentParser):
@@ -73,7 +75,7 @@ class ExcelParser(DocumentParser):
         logger.debug("Parsing XLSX file")
         excel_file = io.BytesIO(content_bytes)
         wb = openpyxl.load_workbook(excel_file, read_only=True, data_only=True)
-        
+
         sheet_texts = []
         metadata = []
 
@@ -85,13 +87,16 @@ class ExcelParser(DocumentParser):
                 row_str = "\t".join([str(val) if val is not None else "" for val in row])
                 if row_str.replace("\t", "").strip():
                     rows.append(row_str)
-            
+
             sheet_text = "\n".join(rows)
-            sheet_texts.append(f"--- Sheet: {sheet_name} ---\n{sheet_text}")
-            metadata.append({
-                "sheet_name": sheet_name,
-                "sheet_index": sheet_idx + 1,
-            })
+            if sheet_text.strip():
+                formatted_sheet_text = f"--- Sheet: {sheet_name} ---\n{sheet_text}"
+                sheet_texts.append(formatted_sheet_text)
+                metadata.append({
+                    "sheet_name": sheet_name,
+                    "sheet_index": sheet_idx + 1,
+                    "text": formatted_sheet_text,
+                })
 
         return "\n\n".join(sheet_texts), metadata
 
@@ -103,7 +108,7 @@ class PptxParser(DocumentParser):
         logger.debug("Parsing PPTX file")
         pptx_file = io.BytesIO(content_bytes)
         presentation = pptx.Presentation(pptx_file)
-        
+
         slide_texts = []
         metadata = []
 
@@ -112,12 +117,14 @@ class PptxParser(DocumentParser):
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.strip():
                     slide_text_parts.append(shape.text)
-            
+
             slide_text = "\n".join(slide_text_parts)
-            slide_texts.append(slide_text)
-            metadata.append({
-                "slide_number": slide_idx + 1,
-            })
+            if slide_text.strip():
+                slide_texts.append(slide_text)
+                metadata.append({
+                    "slide_number": slide_idx + 1,
+                    "text": slide_text,
+                })
 
         return "\n\n".join(slide_texts), metadata
 
@@ -132,8 +139,8 @@ class TextParser(DocumentParser):
         except UnicodeDecodeError:
             # Fallback to latin-1
             text = content_bytes.decode("latin-1")
-            
-        return text, [{"page_number": 1}]
+
+        return text, [{"page_number": 1, "text": text}]
 
 
 class ParserFactory:
@@ -142,7 +149,7 @@ class ParserFactory:
     @staticmethod
     def get_parser(file_type: str) -> DocumentParser:
         clean_type = file_type.lower().strip(".")
-        
+
         if clean_type == "pdf":
             return PDFParser()
         elif clean_type in ("docx", "doc"):

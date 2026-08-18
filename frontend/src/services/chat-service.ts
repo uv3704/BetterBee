@@ -1,7 +1,37 @@
 import { authenticatedRequest } from "@/lib/api";
-import { type AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export interface RetrievedChunk {
+  id: string;
+  document: string;
+  score: number;
+  filename: string;
+  page_number?: number;
+  sheet_name?: string;
+  slide_number?: number;
+  chunk_index?: number;
+}
+
+export interface RerankedChunk extends RetrievedChunk {
+  rank: number;
+}
+
+export interface ExplainabilityData {
+  confidence: number;
+  retrieved_chunks: RetrievedChunk[];
+  reranked_chunks: RerankedChunk[];
+  latencies: {
+    retrieval_ms: number;
+    reranking_ms: number;
+    generation_ms: number;
+    total_ms: number;
+  };
+  model_info: {
+    provider: string;
+    model_name: string;
+  };
+}
 
 export interface Message {
   id: string;
@@ -15,21 +45,7 @@ export interface Message {
     slide_number?: number;
     content_preview?: string;
   }>;
-  explainability_data?: {
-    confidence: number;
-    retrieved_chunks: any[];
-    reranked_chunks: any[];
-    latencies: {
-      retrieval_ms: number;
-      reranking_ms: number;
-      generation_ms: number;
-      total_ms: number;
-    };
-    model_info: {
-      provider: string;
-      model_name: string;
-    };
-  };
+  explainability_data?: ExplainabilityData;
   token_count: number;
   model?: string;
   provider?: string;
@@ -53,7 +69,7 @@ export interface ChatSessionDetail extends ChatSession {
 
 export interface ChatStreamEvent {
   type: "session_id" | "token" | "citations" | "explain" | "message_id";
-  content: any;
+  content: string | Array<{ filename: string; page_number?: number; sheet_name?: string; slide_number?: number; content_preview?: string }> | ExplainabilityData;
 }
 
 export const chatService = {
@@ -152,8 +168,8 @@ export const chatService = {
     sessionId: string,
     messageId: string,
     getToken: () => Promise<string | null>,
-  ): Promise<any> => {
-    return authenticatedRequest<any>(
+  ): Promise<ExplainabilityData> => {
+    return authenticatedRequest<ExplainabilityData>(
       {
         url: `/workspaces/${workspaceId}/chat/sessions/${sessionId}/messages/${messageId}/explain`,
         method: "GET",
@@ -171,7 +187,7 @@ export const chatService = {
     sessionId: string | null,
     getToken: () => Promise<string | null>,
     onEvent: (event: ChatStreamEvent) => void,
-    onError: (err: any) => void,
+    onError: (err: unknown) => void,
     onClose: () => void,
   ): Promise<void> => {
     try {
@@ -205,31 +221,31 @@ export const chatService = {
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
-          
+
           // Keep the last incomplete block in the buffer
           buffer = lines.pop() || "";
 
           for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed) continue;
-            
+
             if (trimmed.startsWith("data: ")) {
               try {
                 const event: ChatStreamEvent = JSON.parse(trimmed.slice(6));
                 onEvent(event);
-              } catch (e) {
-                console.error("Error parsing chat SSE event line:", e, trimmed);
+              } catch (parseErr) {
+                console.error("Error parsing chat SSE event line:", parseErr, trimmed);
               }
             }
           }
         }
-        
+
         // Final line check
         if (buffer.trim().startsWith("data: ")) {
           try {
             const event: ChatStreamEvent = JSON.parse(buffer.trim().slice(6));
             onEvent(event);
-          } catch (e) {
+          } catch {
              // Ignore final edge case parse errors
           }
         }
@@ -238,7 +254,7 @@ export const chatService = {
       }
 
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       onError(err);
     }
   },

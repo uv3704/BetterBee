@@ -3,8 +3,9 @@ BetterBee — User ORM Model.
 """
 
 import uuid
-from typing import TYPE_CHECKING, List
-from sqlalchemy import String, Boolean
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -56,7 +57,7 @@ class User(Base, TimestampMixin):
     )
 
     # Relationships
-    workspaces: Mapped[List["Workspace"]] = relationship(
+    workspaces: Mapped[list["Workspace"]] = relationship(
         "Workspace",
         back_populates="owner",
         cascade="all, delete-orphan",

@@ -3,9 +3,10 @@ BetterBee — CrossEncoder Reranker Provider.
 """
 
 from typing import Any
+
 import structlog
 
-from app.rag.interfaces.reranker import RerankerProvider, RankedResult
+from app.rag.interfaces.reranker import RankedResult, RerankerProvider
 
 logger = structlog.get_logger(__name__)
 
@@ -45,7 +46,7 @@ class CrossEncoderReranker(RerankerProvider):
 
             # Prepare inputs: list of [query, document_text] pairs
             pairs = [[query, doc] for doc in documents]
-            
+
             # Predict similarity scores
             # Note: predict() is synchronous, but fast enough for small batches (e.g. 20 chunks)
             scores = self.model.predict(pairs)

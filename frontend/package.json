@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.8",
+    "@clerk/themes": "^2.4.57",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-query-devtools": "^5.101.1",
     "axios": "^1.18.1",
@@ -24,6 +25,7 @@
     "react-dropzone": "^15.0.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.14"

@@ -1,7 +1,6 @@
 import React from "react";
-import { X, Clock, BarChart2, Activity, Cpu, AlertCircle, FileText, CheckCircle } from "lucide-react";
+import { X, Clock, BarChart2, Activity, Cpu, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 interface ExplainabilityPanelProps {
   isOpen: boolean;
@@ -39,7 +38,7 @@ interface ExplainabilityPanelProps {
       provider: string;
       model_name: string;
     };
-  };
+  } | null;
 }
 
 export function ExplainabilityPanel({ isOpen, onClose, explainData }: ExplainabilityPanelProps) {
@@ -47,52 +46,51 @@ export function ExplainabilityPanel({ isOpen, onClose, explainData }: Explainabi
 
   if (!explainData) {
     return (
-      <div className="flex flex-col h-full border-l border-neutral-900 bg-neutral-950 w-80 shrink-0 p-6">
+      <div className="flex flex-col h-full border-l border-neutral-900 bg-neutral-950/95 backdrop-blur-md w-88 shrink-0 p-6 select-none">
         <div className="flex items-center justify-between pb-4 border-b border-neutral-900">
-          <span className="text-sm font-bold text-neutral-200 flex items-center gap-2">
-            <BarChart2 className="h-4 w-4 text-amber-500" />
-            Answer Explainability
-          </span>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-neutral-950 text-neutral-400">
+          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Explainability</span>
+          <button onClick={onClose} className="text-neutral-500 hover:text-neutral-300">
             <X className="h-4 w-4" />
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <AlertCircle className="h-8 w-8 text-neutral-600 mb-2 animate-bounce" />
-          <span className="text-xs text-neutral-500">No explainability data available for this turn.</span>
+          <AlertCircle className="h-7 w-7 text-zinc-600 mb-2" />
+          <span className="text-xs text-zinc-500">No diagnostic data available for this message.</span>
         </div>
       </div>
     );
   }
 
-  const { confidence, retrieved_chunks = [], reranked_chunks = [], latencies, model_info } = explainData;
+  const { confidence, reranked_chunks = [], latencies = { retrieval_ms: 0, reranking_ms: 0, generation_ms: 0, total_ms: 0 }, model_info } = explainData;
+
+  const retMs = latencies?.retrieval_ms || 0;
+  const rerMs = latencies?.reranking_ms || 0;
+  const genMs = latencies?.generation_ms || 0;
+  const totMs = latencies?.total_ms || 0;
 
   // Latency fractions for visualization
-  const maxLatency = Math.max(
-    latencies.retrieval_ms + latencies.reranking_ms + latencies.generation_ms,
-    latencies.total_ms || 1
-  );
-  
-  const retrievalPct = (latencies.retrieval_ms / maxLatency) * 100;
-  const rerankPct = (latencies.reranking_ms / maxLatency) * 100;
-  const genPct = (latencies.generation_ms / maxLatency) * 100;
+  const maxLatency = Math.max(retMs + rerMs + genMs, totMs || 1);
+
+  const retrievalPct = (retMs / maxLatency) * 100;
+  const rerankPct = (rerMs / maxLatency) * 100;
+  const genPct = (genMs / maxLatency) * 100;
 
   return (
     <motion.div
       initial={{ x: 300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 300, opacity: 0 }}
-      className="flex flex-col h-full border-l border-neutral-900 bg-neutral-950/95 backdrop-blur-md w-88 shrink-0 select-none overflow-y-auto custom-scrollbar"
+      className="flex flex-col h-full border-l border-zinc-800 bg-zinc-950/95 backdrop-blur-md w-88 shrink-0 select-none overflow-y-auto custom-scrollbar"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-neutral-900 sticky top-0 bg-neutral-950/95 z-10">
-        <span className="text-xs font-bold uppercase tracking-wider text-neutral-200 flex items-center gap-2">
-          <BarChart2 className="h-4 w-4 text-amber-500 animate-pulse" />
-          Answer Diagnostics
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800 sticky top-0 bg-zinc-950/95 z-10">
+        <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+          <BarChart2 className="h-4 w-4 text-amber-500" />
+          Query Diagnostics
         </span>
         <button
           onClick={onClose}
-          className="p-1 rounded-md hover:bg-neutral-900 text-neutral-400 hover:text-neutral-200 transition-colors cursor-pointer"
+          className="p-1 rounded-md hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
@@ -183,7 +181,6 @@ export function ExplainabilityPanel({ isOpen, onClose, explainData }: Explainabi
           </span>
           <div className="space-y-2.5">
             {reranked_chunks.map((chunk, index) => {
-              const scorePct = Math.min(100, Math.max(0, (chunk.score + 10) * 5)); // mapping standard scores to visual percentages
               const pRef = chunk.page_number
                 ? `page ${chunk.page_number}`
                 : chunk.sheet_name
@@ -211,7 +208,7 @@ export function ExplainabilityPanel({ isOpen, onClose, explainData }: Explainabi
                   </div>
 
                   <p className="text-[11px] text-neutral-400 line-clamp-3 leading-normal font-mono bg-neutral-950/40 p-2 rounded-lg border border-neutral-950">
-                    "{chunk.document}"
+                    &quot;{chunk.document}&quot;
                   </p>
                 </div>
               );

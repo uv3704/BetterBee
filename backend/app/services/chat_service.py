@@ -5,17 +5,18 @@ Orchestrates conversation threads, messages retrieval, and SSE streaming RAG que
 """
 
 import uuid
-import time
-from typing import AsyncGenerator, Any
+from collections.abc import AsyncGenerator
+from typing import Any
+
 import structlog
 
 from app.core.exceptions import ForbiddenError, NotFoundError
-from app.models.chat import ChatSession, Message
-from app.repositories.chat_repo import ChatSessionRepository, MessageRepository
-from app.repositories.workspace_repo import WorkspaceRepository
-from app.rag.pipeline import RAGPipeline
+from app.models.chat import ChatSession
 from app.prompts.title import build_title_prompt
 from app.rag.factory import LLMFactory
+from app.rag.pipeline import RAGPipeline
+from app.repositories.chat_repo import ChatSessionRepository, MessageRepository
+from app.repositories.workspace_repo import WorkspaceRepository
 
 logger = structlog.get_logger(__name__)
 
@@ -67,7 +68,7 @@ class ChatService:
     ) -> ChatSession:
         """Create a new chat conversation thread."""
         await self._verify_workspace_access(workspace_id, user_id)
-        
+
         session = await self._session_repo.create(
             workspace_id=workspace_id,
             user_id=user_id,
@@ -125,13 +126,13 @@ class ChatService:
             token_count=len(message_content.split()),
             latency_ms=0,
         )
-        
+
         # Invalidate update timestamp of session
         await self._session_repo.update(session)
 
         # 3. Load chat history (past 6 turns)
         history_msgs = await self._message_repo.get_by_session(session_id)
-        
+
         # Exclude the latest user message we just saved
         chat_history = []
         for msg in history_msgs[:-1]:
@@ -215,7 +216,7 @@ class ChatService:
                 token_count=len(err_msg.split()),
                 latency_ms=0,
             )
-            yield {"type": "token", "content": f"\n\n[System Error: {str(e)}]"}
+            yield {"type": "token", "content": f"\n\n[System Error: {e!s}]"}
 
     async def _auto_generate_title(
         self,
@@ -226,11 +227,11 @@ class ChatService:
         """Asynchronously generate a title for the session using LLM and update it."""
         llm = LLMFactory.create()
         prompt_messages = build_title_prompt(query, answer)
-        
+
         # Generate title
         title = await llm.generate(prompt_messages)
         title = title.strip().strip('"').strip("'")
-        
+
         if title:
             # Fetch session in a new query or use session repo
             # Since this runs in same async loop/transaction context of current session,
