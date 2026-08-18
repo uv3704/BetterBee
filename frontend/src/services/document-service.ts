@@ -33,6 +33,37 @@ export interface UploadInitiateResponse {
 
 export const documentService = {
   /**
+   * Upload file directly via multipart form data to backend (bypasses browser S3 CORS limitations).
+   */
+  async uploadDirect(
+    workspaceId: string,
+    file: File,
+    getToken: () => Promise<string | null>,
+    onProgress?: (progress: number) => void,
+  ): Promise<DocumentInfo> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return authenticatedRequest<DocumentInfo>(
+      {
+        url: `/workspaces/${workspaceId}/documents/upload-direct`,
+        method: "POST",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent);
+          }
+        },
+      },
+      getToken,
+    );
+  },
+
+  /**
    * Initiate document upload to receive a pre-signed URL.
    */
   async initiateUpload(

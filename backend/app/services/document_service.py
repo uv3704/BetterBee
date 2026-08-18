@@ -92,6 +92,58 @@ class DocumentService:
         )
         return document, upload_url
 
+    async def upload_direct(
+        self,
+        workspace_id: uuid.UUID,
+        user_id: uuid.UUID,
+        filename: str,
+        content: bytes,
+        file_type: str,
+        background_tasks: Any = None,
+    ) -> Document:
+        """
+        Upload document content directly to storage and confirm ingestion in a single step.
+        Guarantees reliability when browser-to-S3 CORS is restricted.
+        """
+        await self._verify_workspace_access(workspace_id, user_id)
+
+        document_uuid = uuid.uuid4()
+        extension = os.path.splitext(filename)[1]
+        s3_key = f"workspaces/{workspace_id}/documents/{document_uuid}{extension}"
+
+        # 1. Upload content directly to storage provider
+        await self._storage_provider.upload_object(s3_key, content)
+
+        # 2. Save document record
+        document = await self._document_repo.create(
+            id=document_uuid,
+            workspace_id=workspace_id,
+            filename=filename,
+            file_type=file_type,
+            file_size=len(content),
+            s3_key=s3_key,
+            status="uploaded",
+            chunk_count=0,
+            uploaded_by=user_id,
+        )
+
+        workspace_obj = await self._workspace_repo.get_by_id(workspace_id)
+        workspace_name = workspace_obj.name if workspace_obj else "Unknown"
+        size_mb = len(content) / (1024 * 1024)
+        size_str = f"{size_mb:.1f} MB" if size_mb >= 0.1 else f"{len(content) / 1024:.1f} KB"
+        print(f"\n📄 Direct Upload\n"
+              f"────────────────────────────\n"
+              f"File      {filename}\n"
+              f"Size      {size_str}\n"
+              f"Workspace {workspace_name}")
+
+        # 3. Confirm and trigger background processing
+        return await self.confirm_upload(
+            document_id=document.id,
+            user_id=user_id,
+            background_tasks=background_tasks,
+        )
+
     async def confirm_upload(
         self,
         document_id: uuid.UUID,

@@ -5,7 +5,7 @@ BetterBee — Document Ingestion & Management API Endpoints.
 import uuid
 
 import structlog
-from fastapi import APIRouter, BackgroundTasks, Request, status
+from fastapi import APIRouter, BackgroundTasks, File, Request, UploadFile, status
 
 from app.core.deps import CurrentUser, DocumentServiceDep
 from app.schemas.document import (
@@ -19,6 +19,37 @@ from app.schemas.document import (
 logger = structlog.get_logger(__name__)
 
 router = APIRouter()
+
+
+@router.post(
+    "/upload-direct",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def upload_direct(
+    workspace_id: uuid.UUID,
+    file: UploadFile = File(...),
+    current_user: CurrentUser = None,
+    document_service: DocumentServiceDep = None,
+    background_tasks: BackgroundTasks = None,
+) -> DocumentResponse:
+    """
+    Direct multi-part upload endpoint. Receives file bytes, stores to S3, and starts ingestion.
+    Acts as a reliable upload fallback when browser-direct CORS is restricted.
+    """
+    content = await file.read()
+    filename = file.filename or "uploaded_document"
+    file_type = filename.split(".")[-1].lower() if "." in filename else "txt"
+
+    doc = await document_service.upload_direct(
+        workspace_id=workspace_id,
+        user_id=current_user.id,
+        filename=filename,
+        content=content,
+        file_type=file_type,
+        background_tasks=background_tasks,
+    )
+    return DocumentResponse.model_validate(doc)
 
 
 @router.post(

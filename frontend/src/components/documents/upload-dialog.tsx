@@ -45,43 +45,63 @@ export function UploadDialog({ workspaceId, isOpen, onClose }: UploadDialogProps
   // Function to handle a single file upload
   const uploadFile = async (file: File, fileId: string) => {
     try {
-      // 1. Initiate upload with backend
       setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, status: "uploading" } : f))
+        prev.map((f) => (f.id === fileId ? { ...f, status: "uploading", progress: 10 } : f))
       );
       const fileType = file.name.split(".").pop() || "txt";
-      
-      const initiateRes = await documentService.initiateUpload(
-        workspaceId,
-        {
-          filename: file.name,
-          file_size: file.size,
-          file_type: fileType,
-        },
-        getToken
-      );
 
-      // 2. Direct upload (PUT) to pre-signed S3 / Local mock URL
-      await axios.put(initiateRes.upload_url, file, {
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / (progressEvent.total || file.size)
-          );
-          setFiles((prev) =>
-            prev.map((f) => (f.id === fileId ? { ...f, progress: percentCompleted } : f))
-          );
-        },
-      });
+      try {
+        // 1. Attempt direct pre-signed URL upload
+        const initiateRes = await documentService.initiateUpload(
+          workspaceId,
+          {
+            filename: file.name,
+            file_size: file.size,
+            file_type: fileType,
+          },
+          getToken
+        );
 
-      // 3. Confirm upload with backend
-      setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, status: "confirming" } : f))
-      );
-      
-      await documentService.confirmUpload(workspaceId, initiateRes.document_id, getToken);
+        // 2. Direct upload (PUT) to pre-signed S3
+        await axios.put(initiateRes.upload_url, file, {
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / (progressEvent.total || file.size)
+            );
+            setFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, progress: percentCompleted } : f))
+            );
+          },
+        });
+
+        // 3. Confirm upload with backend
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, status: "confirming" } : f))
+        );
+        
+        await documentService.confirmUpload(workspaceId, initiateRes.document_id, getToken);
+      } catch (presignedErr: unknown) {
+        console.warn(`Presigned upload failed for ${file.name}, falling back to direct server upload:`, presignedErr);
+
+        // Fallback: Direct multipart upload through backend
+        setFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, status: "uploading", progress: 30 } : f))
+        );
+
+        await documentService.uploadDirect(
+          workspaceId,
+          file,
+          getToken,
+          (progress) => {
+            setFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, progress } : f))
+            );
+          }
+        );
+      }
 
       // Success
       setFiles((prev) =>
