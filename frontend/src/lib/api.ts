@@ -16,7 +16,7 @@ export const API_BASE_URL = RAW_API_URL.replace(/\/+$/, "");
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
-  timeout: 30000,
+  timeout: 120000,
   headers: {
     "Content-Type": "application/json",
   },
