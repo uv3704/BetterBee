@@ -39,13 +39,15 @@ class Settings(BaseSettings):
             if v_stripped.startswith("[") and v_stripped.endswith("]"):
                 import json
                 try:
-                    return json.loads(v_stripped)
+                    parsed = json.loads(v_stripped)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
                 except Exception:
                     pass
             return [origin.strip() for origin in v_stripped.split(",") if origin.strip()]
         elif isinstance(v, list):
             return [str(item).strip() for item in v if str(item).strip()]
-        return v
+        return ["http://localhost:3000"]
 
     # --- Database ---
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/betterbee"
