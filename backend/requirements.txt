@@ -264,6 +264,7 @@ numpy==2.5.1
     # via
     #   chromadb
     #   onnxruntime
+    #   rank-bm25
     #   scikit-learn
     #   scipy
     #   sentence-transformers
@@ -402,6 +403,8 @@ pyyaml==6.0.3
     #   langchain-core
     #   transformers
     #   uvicorn
+rank-bm25==0.2.2
+    # via betterbee-backend (pyproject.toml)
 redis==6.4.0
     # via
     #   betterbee-backend (pyproject.toml)
