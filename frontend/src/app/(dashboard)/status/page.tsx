@@ -130,7 +130,7 @@ export default function SystemStatusPage() {
             {/* System Info Badges */}
             <div className="flex items-center gap-2 self-stretch sm:self-auto justify-center sm:justify-start">
               <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
-                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
+                <span className="text-[#a0a3b1] block text-[9px] uppercase tracking-wider">
                   Environment
                 </span>
                 <span className="font-mono text-[11px] text-[#eaebee] capitalize">
@@ -138,7 +138,7 @@ export default function SystemStatusPage() {
                 </span>
               </div>
               <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
-                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
+                <span className="text-[#a0a3b1] block text-[9px] uppercase tracking-wider">
                   Uptime
                 </span>
                 <span className="font-mono text-[11px] text-[#eaebee] flex items-center gap-1">
@@ -147,7 +147,7 @@ export default function SystemStatusPage() {
                 </span>
               </div>
               <div className="bg-[#14151a] border border-[#272935] rounded px-2.5 py-1 text-center text-xs">
-                <span className="text-[#6c6f80] block text-[9px] uppercase tracking-wider">
+                <span className="text-[#a0a3b1] block text-[9px] uppercase tracking-wider">
                   Release
                 </span>
                 <span className="font-mono text-[11px] text-[#eaebee]">
@@ -163,7 +163,7 @@ export default function SystemStatusPage() {
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
+                  <span className="text-[#a0a3b1] uppercase tracking-wider text-[10px] block font-mono">
                     PostgreSQL Node
                   </span>
                   <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function SystemStatusPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
-                <span className="text-[#6c6f80]">Response Latency</span>
+                <span className="text-[#a0a3b1]">Response Latency</span>
                 <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
                   <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.database.latency_ms ? `${health.services.database.latency_ms} ms` : "--"}
@@ -198,7 +198,7 @@ export default function SystemStatusPage() {
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
+                  <span className="text-[#a0a3b1] uppercase tracking-wider text-[10px] block font-mono">
                     Redis Cache
                   </span>
                   <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
@@ -215,7 +215,7 @@ export default function SystemStatusPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
-                <span className="text-[#6c6f80]">Ping Latency</span>
+                <span className="text-[#a0a3b1]">Ping Latency</span>
                 <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
                   <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.redis.latency_ms ? `${health.services.redis.latency_ms} ms` : "--"}
@@ -233,7 +233,7 @@ export default function SystemStatusPage() {
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
+                  <span className="text-[#a0a3b1] uppercase tracking-wider text-[10px] block font-mono">
                     ChromaDB Store
                   </span>
                   <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
@@ -250,7 +250,7 @@ export default function SystemStatusPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
-                <span className="text-[#6c6f80]">Query Latency</span>
+                <span className="text-[#a0a3b1]">Query Latency</span>
                 <span className="font-mono text-[#eaebee] flex items-center gap-1 text-[11px]">
                   <Zap className="h-3 w-3 text-[#d48b38]" />
                   {health.services.chromadb.latency_ms ? `${health.services.chromadb.latency_ms} ms` : "--"}
@@ -268,7 +268,7 @@ export default function SystemStatusPage() {
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex flex-col justify-between space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-[#6c6f80] uppercase tracking-wider text-[10px] block font-mono">
+                  <span className="text-[#a0a3b1] uppercase tracking-wider text-[10px] block font-mono">
                     AI Compute Nodes
                   </span>
                   <h4 className="text-sm font-medium text-[#eaebee] flex items-center gap-2">
@@ -285,12 +285,12 @@ export default function SystemStatusPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-[#23252d] pt-3 text-xs">
-                <span className="text-[#6c6f80]">Connection State</span>
+                <span className="text-[#a0a3b1]">Connection State</span>
                 <span className="font-mono text-[#eaebee] flex items-center gap-1.5 text-[11px]">
                   {health.services.ollama.status === "not_configured" ? (
                     <>
                       <span>Groq Llama-3 Cloud</span>
-                      <ExternalLink className="h-3 w-3 text-[#6c6f80]" />
+                      <ExternalLink className="h-3 w-3 text-[#a0a3b1]" />
                     </>
                   ) : (
                     <>

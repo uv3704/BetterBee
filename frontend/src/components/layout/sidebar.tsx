@@ -174,19 +174,22 @@ export function Sidebar() {
         {isCollapsed ? (
           <button
             onClick={() => setIsCollapsed(false)}
+            aria-label="Expand workspace switcher"
             className="flex h-9 w-9 items-center justify-center rounded bg-[#18191f] border border-[#272935] text-[#d48b38] hover:bg-[#20222b] mx-auto cursor-pointer"
             title={effectiveWs ? effectiveWs.name : "Select Workspace"}
           >
             {effectiveWs?.icon ? (
               <span className="text-sm">{effectiveWs.icon}</span>
             ) : (
-              <Plus className="h-4 w-4 text-[#8b8e9b]" />
+              <Plus className="h-4 w-4 text-[#a0a3b1]" />
             )}
           </button>
         ) : (
           <div className="space-y-1">
             <button
               onClick={() => setIsDropdownOpen((prev) => !prev)}
+              aria-label="Toggle workspace switcher dropdown"
+              aria-expanded={isDropdownOpen}
               className="w-full flex items-center justify-between gap-2 p-2 rounded bg-[#18191f] hover:bg-[#1f212a] border border-[#272935] text-left transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2 min-w-0">
@@ -198,13 +201,13 @@ export function Sidebar() {
                     {effectiveWs ? effectiveWs.name : "Select Workspace"}
                   </span>
                   {effectiveWs && (
-                    <span className="text-[10px] text-[#6c6f80] font-mono block truncate">
+                    <span className="text-[10px] text-[#a0a3b1] font-mono block truncate">
                       /{effectiveWs.slug}
                     </span>
                   )}
                 </div>
               </div>
-              <ChevronDown className={`h-3.5 w-3.5 text-[#8b8e9b] transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`h-3.5 w-3.5 text-[#a0a3b1] transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Dropdown Popover */}
@@ -212,7 +215,7 @@ export function Sidebar() {
               <div className="absolute top-full left-3 right-3 mt-1.5 z-50 rounded-lg border border-[#272935] bg-[#18191f] shadow-xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-100">
                 <div className="max-h-52 overflow-y-auto space-y-0.5 custom-scrollbar">
                   {workspaces.length === 0 ? (
-                    <div className="p-3 text-center text-xs text-[#6c6f80]">
+                    <div className="p-3 text-center text-xs text-[#a0a3b1]">
                       No workspaces found.
                     </div>
                   ) : (
@@ -228,35 +231,37 @@ export function Sidebar() {
                           }}
                           className={`w-full flex items-center justify-between p-2 rounded text-xs transition-colors cursor-pointer ${
                             isSelected
-                              ? "bg-[#23252d] text-[#f4f4f6] font-medium"
-                              : "text-[#8b8e9b] hover:bg-[#1e2028] hover:text-[#eaebee]"
+                              ? "bg-[#272935] text-[#f4f4f6] font-medium"
+                              : "text-[#a0a3b1] hover:bg-[#1f212a] hover:text-[#eaebee]"
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs">{w.icon || "🐝"}</span>
+                            <span className="text-sm">{w.icon || "🐝"}</span>
                             <div className="min-w-0 text-left">
                               <span className="block truncate">{w.name}</span>
-                              <span className="text-[10px] text-[#6c6f80] block font-mono">
-                                {w.document_count} files
+                              <span className="text-[10px] text-[#a0a3b1] block font-mono">
+                                /{w.slug}
                               </span>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-3.5 w-3.5 text-[#d48b38] shrink-0 ml-2" />}
+                          {isSelected && <Check className="h-3.5 w-3.5 text-[#d48b38] shrink-0" />}
                         </button>
                       );
                     })
                   )}
                 </div>
 
-                <div className="border-t border-[#272935] pt-1">
-                  <Link
-                    href="/workspaces/new"
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="w-full flex items-center gap-2 p-2 rounded text-xs text-[#d48b38] hover:bg-[#1e2028] transition-colors font-medium"
+                <div className="pt-1.5 border-t border-[#272935]">
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      router.push("/workspaces/new");
+                    }}
+                    className="w-full flex items-center gap-2 p-1.5 rounded text-xs text-[#d48b38] hover:bg-[#20222b] transition-colors cursor-pointer font-medium"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>Create New Workspace</span>
-                  </Link>
+                    <span>Create Workspace</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -264,12 +269,12 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Navigation Groups */}
-      <nav className="flex-1 space-y-4 p-3 overflow-y-auto">
+      {/* Navigation Links */}
+      <nav className="flex-1 space-y-6 px-3 py-4 overflow-y-auto custom-scrollbar">
         {navigation.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             {!isCollapsed && (
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#6c6f80] px-2 block">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#a0a3b1] px-2 block">
                 {group.group}
               </span>
             )}
@@ -283,7 +288,7 @@ export function Sidebar() {
                     className={`flex w-full items-center gap-3 rounded px-2.5 py-2 text-xs transition-colors cursor-pointer ${
                       item.current
                         ? "bg-[#1f212a] text-[#f4f4f6] font-medium border border-[#2c2e3a]"
-                        : "text-[#8b8e9b] hover:bg-[#18191f] hover:text-[#eaebee]"
+                        : "text-[#a0a3b1] hover:bg-[#18191f] hover:text-[#eaebee]"
                     }`}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -307,7 +312,8 @@ export function Sidebar() {
       {/* Collapse Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-[#272935] bg-[#18191f] text-[#8b8e9b] hover:text-[#eaebee] shadow-sm transition-colors z-50 cursor-pointer text-xs"
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-[#272935] bg-[#18191f] text-[#a0a3b1] hover:text-[#eaebee] shadow-sm transition-colors z-50 cursor-pointer text-xs"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

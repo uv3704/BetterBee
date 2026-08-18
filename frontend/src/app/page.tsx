@@ -75,7 +75,7 @@ export default function Home() {
         <section className="rounded-lg border border-[#23252d] bg-[#18191f] overflow-hidden">
           <div className="border-b border-[#23252d] px-4 py-3 flex items-center justify-between bg-[#15161b] text-xs">
             <div className="flex items-center gap-2 text-[#8b8e9b]">
-              <span className="font-mono text-[11px] text-[#6c6f80]">workspace &mdash;</span>
+              <span className="font-mono text-[11px] text-[#a0a3b1]">workspace &mdash;</span>
               <span className="text-[#b0b3c1] font-medium">Enterprise_Procurement_2024</span>
             </div>
 
@@ -123,7 +123,7 @@ export default function Home() {
                     </ul>
 
                     <div className="pt-2.5 border-t border-[#23252d] flex flex-wrap items-center gap-2 text-[11px] text-[#8b8e9b]">
-                      <span className="text-[#6c6f80]">Grounded Citations:</span>
+                      <span className="text-[#a0a3b1]">Grounded Citations:</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#1c1e27] border border-[#2c2e3a] text-[#b0b3c1]">
                         <FileText className="h-3 w-3 text-[#d48b38]" /> Master_Service_Agreement.pdf &middot; Page 14 (Section 8.2)
                       </span>
@@ -139,14 +139,14 @@ export default function Home() {
             {activeTab === "search" && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 rounded border border-[#272935] bg-[#121316] px-3 py-2 text-xs text-[#b0b3c1]">
-                  <Search className="h-3.5 w-3.5 text-[#6c6f80]" />
+                  <Search className="h-3.5 w-3.5 text-[#a0a3b1]" />
                   <span>termination fee early exit penalty 60 days notice</span>
                 </div>
                 <div className="space-y-2">
                   <div className="rounded border border-[#23252d] bg-[#14151a] p-3 space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-[#eaebee]">Master_Service_Agreement.pdf</span>
-                      <span className="text-[#6c6f80] font-mono text-[11px]">96% Match &middot; Page 14</span>
+                      <span className="text-[#a0a3b1] font-mono text-[11px]">96% Match &middot; Page 14</span>
                     </div>
                     <p className="text-xs text-[#8b8e9b] leading-normal">
                       &ldquo;8.2 Termination for Convenience. Client may terminate this Agreement upon sixty (60) days prior written notice, subject to early termination fees set forth in Schedule B...&rdquo;
@@ -155,7 +155,7 @@ export default function Home() {
                   <div className="rounded border border-[#23252d] bg-[#14151a] p-3 space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-[#eaebee]">Rate_Card_Schedule_B.xlsx</span>
-                      <span className="text-[#6c6f80] font-mono text-[11px]">88% Match &middot; Sheet 1</span>
+                      <span className="text-[#a0a3b1] font-mono text-[11px]">88% Match &middot; Sheet 1</span>
                     </div>
                     <p className="text-xs text-[#8b8e9b] leading-normal">
                       &ldquo;Row 42: Early Termination Fee = 50% * Remaining Monthly Minimum Commitment Balance.&rdquo;
@@ -169,14 +169,14 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="rounded border border-[#23252d] bg-[#14151a] p-3.5 space-y-1.5">
                   <div className="font-medium text-[#eaebee]">Master_Service_Agreement.pdf</div>
-                  <div className="text-[#6c6f80]">Document ID: doc_7fa82 &middot; Page 14 &middot; Chunk 48</div>
+                  <div className="text-[#a0a3b1]">Document ID: doc_7fa82 &middot; Page 14 &middot; Chunk 48</div>
                   <div className="text-[11px] text-[#9fa2b4] bg-[#18191f] p-2 rounded border border-[#23252d]">
                     Contains termination definitions, notice periods, and dispute resolution terms.
                   </div>
                 </div>
                 <div className="rounded border border-[#23252d] bg-[#14151a] p-3.5 space-y-1.5">
                   <div className="font-medium text-[#eaebee]">Rate_Card_Schedule_B.xlsx</div>
-                  <div className="text-[#6c6f80]">Document ID: doc_3bc19 &middot; Sheet: Fee Schedule</div>
+                  <div className="text-[#a0a3b1]">Document ID: doc_3bc19 &middot; Sheet: Fee Schedule</div>
                   <div className="text-[11px] text-[#9fa2b4] bg-[#18191f] p-2 rounded border border-[#23252d]">
                     Contains fee structures, billing rates, and multiplier formulas.
                   </div>
@@ -281,7 +281,7 @@ export default function Home() {
               },
             ].map((item, idx) => (
               <div key={idx} className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 space-y-2">
-                <div className="flex items-center justify-between text-xs text-[#6c6f80] font-mono">
+                <div className="flex items-center justify-between text-xs text-[#a0a3b1] font-mono">
                   <item.icon className="h-4 w-4 text-[#d48b38]" />
                   <span>{item.step}</span>
                 </div>
@@ -384,7 +384,7 @@ export default function Home() {
               >
                 <item.icon className="h-4 w-4 mx-auto text-[#8b8e9b]" />
                 <div className="font-mono text-xs font-medium text-[#d48b38]">{item.ext}</div>
-                <div className="text-[11px] text-[#6c6f80]">{item.label}</div>
+                <div className="text-[11px] text-[#a0a3b1]">{item.label}</div>
               </div>
             ))}
           </div>
@@ -556,7 +556,7 @@ export default function Home() {
                       className={`px-3 py-2 text-[11px] font-mono uppercase tracking-wider transition-colors border-b-2 cursor-pointer ${
                         cvTab === tab.id
                           ? "border-[#d48b38] text-[#f4f4f6] font-medium"
-                          : "border-transparent text-[#6c6f80] hover:text-[#9fa2b4]"
+                          : "border-transparent text-[#a0a3b1] hover:text-[#9fa2b4]"
                       }`}
                     >
                       {tab.label}
@@ -573,7 +573,7 @@ export default function Home() {
                           <span className="font-medium text-[#eaebee]">
                             Infosys Springboard <span className="text-[#8b8e9b]">&middot; AI/ML Intern</span>
                           </span>
-                          <span className="font-mono text-[10px] text-[#6c6f80]">Oct 2024 – Dec 2024</span>
+                          <span className="font-mono text-[10px] text-[#a0a3b1]">Oct 2024 – Dec 2024</span>
                         </div>
                         <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#9fa2b4] leading-relaxed">
                           <li>Built CNN model using TensorFlow achieving 97.5% accuracy on 10-class image classification.</li>
@@ -586,7 +586,7 @@ export default function Home() {
                           <span className="font-medium text-[#eaebee]">
                             ThrivesUp Consultancy Services <span className="text-[#8b8e9b]">&middot; Java Backend Intern</span>
                           </span>
-                          <span className="font-mono text-[10px] text-[#6c6f80]">Jul 2025 – Sep 2025</span>
+                          <span className="font-mono text-[10px] text-[#a0a3b1]">Jul 2025 – Sep 2025</span>
                         </div>
                         <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#9fa2b4] leading-relaxed">
                           <li>Developed 12+ RESTful API endpoints using Java, Spring patterns, JDBC, and MySQL for academic records.</li>
@@ -622,7 +622,7 @@ export default function Home() {
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-[#eaebee]">Bachelor of Technology (B.Tech)</span>
-                          <span className="font-mono text-[10px] text-[#6c6f80]">2022 – 2026</span>
+                          <span className="font-mono text-[10px] text-[#a0a3b1]">2022 – 2026</span>
                         </div>
                         <p className="text-[11px] text-[#d48b38]">Computer Science &amp; Engineering (AI Specialization)</p>
                         <p className="text-[11px] text-[#8b8e9b]">Faculty of Engineering and Technology, Mandsaur University, MP, India</p>
@@ -632,7 +632,7 @@ export default function Home() {
                 </div>
 
                 {/* CV Footer */}
-                <div className="border-t border-[#282b36] px-4 py-2.5 bg-[#13151c] flex items-center justify-between text-[10px] text-[#6c6f80] font-mono">
+                <div className="border-t border-[#282b36] px-4 py-2.5 bg-[#13151c] flex items-center justify-between text-[10px] text-[#a0a3b1] font-mono">
                   <span>Mandsaur, MP, India</span>
                   <a
                     href="https://yuviii.in"

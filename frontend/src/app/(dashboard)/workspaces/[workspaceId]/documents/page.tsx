@@ -166,13 +166,14 @@ export default function WorkspaceDocumentsPage() {
       {/* Filter and Search */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#6c6f80]" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#a0a3b1]" />
           <input
             type="text"
             placeholder="Search documents by filename..."
+            aria-label="Search documents by filename"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-1.5 pl-9 text-xs focus:outline-hidden focus:border-[#3d4152] placeholder:text-[#6c6f80]"
+            className="w-full bg-[#14151a] border border-[#272935] text-[#eaebee] rounded px-3 py-1.5 pl-9 text-xs focus:outline-hidden focus:border-[#3d4152] placeholder:text-[#a0a3b1]"
           />
         </div>
       </div>
@@ -185,7 +186,7 @@ export default function WorkspaceDocumentsPage() {
         </div>
       ) : filteredDocs.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center p-14 rounded-lg border border-dashed border-[#272935] bg-[#18191f]/40">
-          <FileText className="h-10 w-10 text-[#6c6f80] mb-3" />
+          <FileText className="h-10 w-10 text-[#a0a3b1] mb-3" />
           <h3 className="text-sm font-medium text-[#eaebee]">No documents found</h3>
           <p className="text-xs text-[#8b8e9b] mt-0.5 max-w-xs mx-auto">
             {searchQuery ? "No documents match your search query." : "Upload documents to this workspace to index and query."}
@@ -220,43 +221,44 @@ export default function WorkspaceDocumentsPage() {
                 const ext = doc.filename.split(".").pop()?.toUpperCase() || doc.file_type.toUpperCase();
 
                 return (
-                  <tr key={doc.id} className="hover:bg-[#15161d] transition-colors group">
-                    <td className="py-3.5 px-4 font-medium text-[#eaebee]">
+                  <tr key={doc.id} className="hover:bg-[#1f212a]/50 transition-colors group">
+                    <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#14151a] border border-[#272935] text-[#d48b38]">
                           <FileText className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <span className="block truncate max-w-sm font-medium text-[#f4f4f6]" title={doc.filename}>
+                          <span className="font-medium text-[#eaebee] block truncate group-hover:text-white transition-colors">
                             {doc.filename}
+                          </span>
+                          <span className="text-[10px] text-[#8b8e9b] font-mono block">
+                            {doc.chunk_count ? `${doc.chunk_count} vector chunks` : "Pending chunking"}
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-[10px] font-mono text-[#8b8e9b]">
-                      <span className="px-1.5 py-0.5 rounded bg-[#14151a] border border-[#272935] text-[#b0b3c1]">
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#a0a3b1]">
+                      <span className="px-1.5 py-0.5 rounded bg-[#14151a] border border-[#272935]">
                         {ext}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-[#8b8e9b] font-mono text-[11px]">
-                      {sizeDisplay}
-                    </td>
-                    <td className="py-3.5 px-4 text-[#8b8e9b] text-[11px]">
-                      {new Date(doc.created_at).toLocaleDateString(undefined, {
-                        year: "numeric",
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#a0a3b1]">{sizeDisplay}</td>
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#a0a3b1]">
+                      {new Date(doc.created_at).toLocaleDateString([], {
                         month: "short",
                         day: "numeric",
+                        year: "numeric",
                       })}
                     </td>
                     <td className="py-3.5 px-4">
                       {doc.status === "ready" && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-950/30 text-emerald-400 border border-emerald-900/40 font-mono">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-950/30 text-emerald-400 border border-emerald-900/40">
                           <CheckCircle className="h-3 w-3" />
-                          Ready ({doc.chunk_count} chunks)
+                          Indexed
                         </span>
                       )}
-                      {(doc.status === "uploaded" || doc.status === "processing") && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#241f17] text-[#d48b38] border border-[#3d2e18]">
+                      {doc.status === "processing" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/30 text-amber-400 border border-amber-900/40">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           Processing
                         </span>
@@ -268,6 +270,12 @@ export default function WorkspaceDocumentsPage() {
                         >
                           <XCircle className="h-3 w-3" />
                           Failed
+                        </span>
+                      )}
+                      {doc.status === "uploaded" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#241f17] text-[#d48b38] border border-[#3d2e18]">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Queued
                         </span>
                       )}
                     </td>
@@ -285,7 +293,8 @@ export default function WorkspaceDocumentsPage() {
                         )}
                         <button
                           onClick={() => handleDelete(doc.id, doc.filename)}
-                          className="text-[#6c6f80] hover:text-rose-400 p-1.5 hover:bg-rose-500/10 rounded transition-colors inline-flex cursor-pointer"
+                          aria-label={`Delete ${doc.filename}`}
+                          className="text-[#a0a3b1] hover:text-rose-400 p-1.5 hover:bg-rose-500/10 rounded transition-colors inline-flex cursor-pointer"
                           title="Delete document and purge vectors"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

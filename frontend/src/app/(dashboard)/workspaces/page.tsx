@@ -128,15 +128,15 @@ export default function WorkspacesPage() {
         {/* Total Workspaces */}
         <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[11px] text-[#8b8e9b]">Active Workspaces</span>
+            <span className="text-[11px] text-[#a0a3b1]">Active Workspaces</span>
             <div className="text-xl font-semibold text-[#f4f4f6]">
               {isLoading ? "-" : analytics?.total_workspaces}
             </div>
-            <span className="text-[10px] text-[#6c6f80] block">
+            <span className="text-[10px] text-[#a0a3b1] block">
               {workspaces.length} registered
             </span>
           </div>
-          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#8b8e9b]">
+          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#a0a3b1]">
             <Layers className="h-4 w-4" />
           </div>
         </div>
@@ -144,15 +144,15 @@ export default function WorkspacesPage() {
         {/* Total Documents / Storage */}
         <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[11px] text-[#8b8e9b]">Indexed Documents</span>
+            <span className="text-[11px] text-[#a0a3b1]">Indexed Documents</span>
             <div className="text-xl font-semibold text-[#f4f4f6]">
               {isLoading ? "-" : analytics?.total_documents}
             </div>
-            <span className="text-[10px] text-[#6c6f80] block">
+            <span className="text-[10px] text-[#a0a3b1] block">
               {isLoading ? "" : `${analytics?.total_chunks} chunks · ${formatBytes(analytics?.total_storage_bytes || 0)}`}
             </span>
           </div>
-          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#8b8e9b]">
+          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#a0a3b1]">
             <Database className="h-4 w-4" />
           </div>
         </div>
@@ -160,15 +160,15 @@ export default function WorkspacesPage() {
         {/* Queries executed */}
         <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[11px] text-[#8b8e9b]">Total Queries</span>
+            <span className="text-[11px] text-[#a0a3b1]">Total Queries</span>
             <div className="text-xl font-semibold text-[#f4f4f6]">
               {isLoading ? "-" : analytics?.total_queries}
             </div>
-            <span className="text-[10px] text-[#6c6f80] block">
+            <span className="text-[10px] text-[#a0a3b1] block">
               {isLoading ? "" : `${analytics?.total_tokens.toLocaleString()} tokens streamed`}
             </span>
           </div>
-          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#8b8e9b]">
+          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#a0a3b1]">
             <MessageSquare className="h-4 w-4" />
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function WorkspacesPage() {
         {/* Latency */}
         <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-4 flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[11px] text-[#8b8e9b]">Avg Latency</span>
+            <span className="text-[11px] text-[#a0a3b1]">Avg Latency</span>
             <div className="text-xl font-semibold text-[#f4f4f6]">
               {isLoading ? "-" : `${analytics?.avg_latency_ms.toFixed(0)} ms`}
             </div>
@@ -184,7 +184,7 @@ export default function WorkspacesPage() {
               Groq Llama-3 LPU
             </span>
           </div>
-          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#8b8e9b]">
+          <div className="h-8 w-8 rounded bg-[#14151a] border border-[#23252d] flex items-center justify-center text-[#a0a3b1]">
             <Clock className="h-4 w-4" />
           </div>
         </div>
@@ -198,37 +198,40 @@ export default function WorkspacesPage() {
           {/* Workspaces Header + Search Filter Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2">
-              <h2 className="text-xs font-medium text-[#8b8e9b] uppercase tracking-wider">
+              <h2 className="text-xs font-medium text-[#a0a3b1] uppercase tracking-wider">
                 Workspaces ({filteredWorkspaces.length})
               </h2>
               {/* Filter chips */}
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setFilterType("all")}
+                  aria-label="Show all workspaces"
                   className={`px-2 py-0.5 rounded text-[10px] transition-colors cursor-pointer ${
                     filterType === "all"
                       ? "bg-[#272935] text-[#f4f4f6] font-medium"
-                      : "text-[#6c6f80] hover:text-[#b0b3c1]"
+                      : "text-[#a0a3b1] hover:text-[#f4f4f6]"
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setFilterType("has_docs")}
+                  aria-label="Filter workspaces with documents"
                   className={`px-2 py-0.5 rounded text-[10px] transition-colors cursor-pointer ${
                     filterType === "has_docs"
                       ? "bg-[#272935] text-[#f4f4f6] font-medium"
-                      : "text-[#6c6f80] hover:text-[#b0b3c1]"
+                      : "text-[#a0a3b1] hover:text-[#f4f4f6]"
                   }`}
                 >
                   With Docs
                 </button>
                 <button
                   onClick={() => setFilterType("empty")}
+                  aria-label="Filter empty workspaces"
                   className={`px-2 py-0.5 rounded text-[10px] transition-colors cursor-pointer ${
                     filterType === "empty"
                       ? "bg-[#272935] text-[#f4f4f6] font-medium"
-                      : "text-[#6c6f80] hover:text-[#b0b3c1]"
+                      : "text-[#a0a3b1] hover:text-[#f4f4f6]"
                   }`}
                 >
                   Empty
@@ -239,13 +242,14 @@ export default function WorkspacesPage() {
             {/* Live Search Input */}
             {workspaces.length > 2 && (
               <div className="relative w-full sm:w-48">
-                <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-[#6c6f80]" />
+                <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-[#a0a3b1]" />
                 <input
                   type="text"
                   placeholder="Filter workspaces..."
+                  aria-label="Filter workspaces"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#18191f] border border-[#272935] rounded-md pl-8 pr-2.5 py-1 text-xs text-[#eaebee] placeholder:text-[#6c6f80] focus:outline-hidden focus:border-[#3d4152] transition-colors"
+                  className="w-full bg-[#18191f] border border-[#272935] rounded-md pl-8 pr-2.5 py-1 text-xs text-[#eaebee] placeholder:text-[#a0a3b1] focus:outline-hidden focus:border-[#3d4152] transition-colors"
                 />
               </div>
             )}
@@ -306,7 +310,7 @@ export default function WorkspacesPage() {
                             <h3 className="font-medium text-[#eaebee] group-hover:text-[#f4f4f6] transition-colors text-xs truncate">
                               {workspace.name}
                             </h3>
-                            <span className="text-[10px] text-[#6c6f80] font-mono block truncate">
+                            <span className="text-[10px] text-[#a0a3b1] font-mono block truncate">
                               /{workspace.slug}
                             </span>
                           </div>
@@ -318,7 +322,8 @@ export default function WorkspacesPage() {
                             e.stopPropagation();
                             setDeletingWorkspace(workspace);
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/10 text-[#6c6f80] hover:text-rose-400 transition-all cursor-pointer shrink-0"
+                          aria-label={`Delete workspace ${workspace.name}`}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/10 text-[#a0a3b1] hover:text-rose-400 transition-all cursor-pointer shrink-0"
                           title="Delete workspace"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -336,7 +341,7 @@ export default function WorkspacesPage() {
 
                     {/* Card Footer with Direct Tool Buttons */}
                     <div className="border-t border-[#23252d] pt-2.5 mt-3 flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1 text-[11px] text-[#6c6f80]">
+                      <span className="flex items-center gap-1 text-[11px] text-[#a0a3b1]">
                         <FolderOpen className="h-3 w-3" />
                         {workspace.document_count} files
                       </span>
@@ -346,6 +351,7 @@ export default function WorkspacesPage() {
                         <button
                           type="button"
                           onClick={() => handleSelectWorkspace(workspace, "chat")}
+                          aria-label={`Open chat for ${workspace.name}`}
                           className="flex items-center gap-1 px-2 py-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[11px] text-[#eaebee] border border-[#272935] hover:border-[#353847] transition-colors cursor-pointer"
                           title="Open Chat"
                         >
@@ -356,7 +362,8 @@ export default function WorkspacesPage() {
                         <button
                           type="button"
                           onClick={() => handleSelectWorkspace(workspace, "documents")}
-                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#8b8e9b] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
+                          aria-label={`Open documents for ${workspace.name}`}
+                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#a0a3b1] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
                           title="Documents"
                         >
                           <FolderOpen className="h-3 w-3" />
@@ -365,7 +372,8 @@ export default function WorkspacesPage() {
                         <button
                           type="button"
                           onClick={() => handleSelectWorkspace(workspace, "search")}
-                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#8b8e9b] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
+                          aria-label={`Search vector index for ${workspace.name}`}
+                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#a0a3b1] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
                           title="Search Vector Explorer"
                         >
                           <Search className="h-3 w-3" />
@@ -374,7 +382,8 @@ export default function WorkspacesPage() {
                         <button
                           type="button"
                           onClick={() => handleSelectWorkspace(workspace, "settings")}
-                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#8b8e9b] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
+                          aria-label={`Open settings for ${workspace.name}`}
+                          className="p-1 rounded bg-[#14151a] hover:bg-[#20222b] text-[#a0a3b1] hover:text-[#eaebee] border border-[#272935] transition-colors cursor-pointer"
                           title="Settings"
                         >
                           <Settings className="h-3 w-3" />
@@ -393,14 +402,14 @@ export default function WorkspacesPage() {
           
           {/* Document Status */}
           <div className="space-y-2">
-            <h2 className="text-xs font-medium text-[#8b8e9b] uppercase tracking-wider">
+            <h2 className="text-xs font-medium text-[#a0a3b1] uppercase tracking-wider">
               Document Pipeline Status
             </h2>
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-3.5 space-y-2">
               {isLoading ? (
                 <div className="h-12 animate-pulse bg-[#14151a] rounded" />
               ) : !analytics?.document_statuses.length ? (
-                <p className="text-xs text-[#6c6f80] text-center py-3">No documents indexed yet.</p>
+                <p className="text-xs text-[#a0a3b1] text-center py-3">No documents indexed yet.</p>
               ) : (
                 <div className="space-y-1.5">
                   {analytics.document_statuses.map((status) => {
@@ -432,7 +441,7 @@ export default function WorkspacesPage() {
 
           {/* Recent Activity */}
           <div className="space-y-2">
-            <h2 className="text-xs font-medium text-[#8b8e9b] uppercase tracking-wider">
+            <h2 className="text-xs font-medium text-[#a0a3b1] uppercase tracking-wider">
               Recent Queries &amp; Uploads
             </h2>
             <div className="rounded-lg border border-[#23252d] bg-[#18191f] p-3.5 space-y-2">
@@ -443,7 +452,7 @@ export default function WorkspacesPage() {
                   ))}
                 </div>
               ) : !analytics?.recent_queries.length && !analytics?.recent_uploads.length ? (
-                <p className="text-xs text-[#6c6f80] text-center py-3">No recent activity recorded.</p>
+                <p className="text-xs text-[#a0a3b1] text-center py-3">No recent activity recorded.</p>
               ) : (
                 <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                   {analytics?.recent_queries.map((q) => (
@@ -462,12 +471,12 @@ export default function WorkspacesPage() {
                         <span className="font-mono text-[#d48b38]">
                           {q.workspace_name}
                         </span>
-                        <span className="text-[#6c6f80] font-mono">{q.latency_ms} ms</span>
+                        <span className="text-[#a0a3b1] font-mono">{q.latency_ms} ms</span>
                       </div>
                       <p className="text-xs text-[#b0b3c1] line-clamp-2 group-hover:text-[#f4f4f6] transition-colors">
                         &ldquo;{q.query}&rdquo;
                       </p>
-                      <span className="text-[10px] text-[#6c6f80] block font-mono">
+                      <span className="text-[10px] text-[#a0a3b1] block font-mono">
                         {new Date(q.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
@@ -486,13 +495,13 @@ export default function WorkspacesPage() {
                       className="group cursor-pointer p-2.5 rounded bg-[#14151a] hover:bg-[#191b22] border border-[#23252d] hover:border-[#2f3240] transition-colors space-y-1"
                     >
                       <div className="flex items-center justify-between text-[10px]">
-                        <span className="font-mono text-[#8b8e9b]">
+                        <span className="font-mono text-[#a0a3b1]">
                           {doc.workspace_name}
                         </span>
-                        <span className="text-[#6c6f80] capitalize">{doc.status}</span>
+                        <span className="text-[#a0a3b1] capitalize">{doc.status}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs">
-                        <FileText className="h-3 w-3 text-[#6c6f80] shrink-0" />
+                        <FileText className="h-3 w-3 text-[#a0a3b1] shrink-0" />
                         <p className="text-[#b0b3c1] truncate group-hover:text-[#f4f4f6] transition-colors text-xs">
                           {doc.filename}
                         </p>

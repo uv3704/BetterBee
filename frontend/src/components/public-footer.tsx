@@ -11,7 +11,7 @@ export function PublicFooter() {
               <BeeIcon className="h-4 w-4 text-[#d48b38]" />
               <span className="font-semibold text-[#f4f4f6]">BetterBee</span>
             </div>
-            <p className="text-[11px] text-[#6c6f80] leading-relaxed">
+            <p className="text-[11px] text-[#a0a3b1] leading-relaxed">
               Production document intelligence and verifiable retrieval for modern teams.
             </p>
           </div>
@@ -38,7 +38,7 @@ export function PublicFooter() {
 
           <div className="space-y-2">
             <span className="font-medium text-[#f4f4f6] text-[11px] uppercase tracking-wider">Platform Stack</span>
-            <ul className="space-y-1.5 text-[11px] text-[#6c6f80]">
+            <ul className="space-y-1.5 text-[11px] text-[#a0a3b1]">
               <li>FastAPI + ChromaDB</li>
               <li>Groq Llama 3 Inference</li>
               <li>SentenceTransformers</li>
@@ -76,7 +76,7 @@ export function PublicFooter() {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[#23252d] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#6c6f80]">
+        <div className="pt-6 border-t border-[#23252d] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#a0a3b1]">
           <div>
             Built by <a href="https://yuviii.in" target="_blank" rel="noopener noreferrer" className="text-[#b0b3c1] hover:text-[#eaebee] font-medium">Yuvraj Singh Rathore</a> &middot; &copy; {new Date().getFullYear()} BetterBee.
           </div>
