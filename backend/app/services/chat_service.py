@@ -104,7 +104,7 @@ class ChatService:
         """
         Send a user message, run the RAG query pipeline, and stream the response.
         Saves user and assistant messages in database.
-        
+
         Yields streaming event dicts:
         - {"type": "token", "content": str}
         - {"type": "citations", "content": list}
@@ -117,7 +117,7 @@ class ChatService:
         session = await self.get_session_by_id(session_id, user_id)
 
         # 2. Save user message to database
-        user_msg = await self._message_repo.create(
+        await self._message_repo.create(
             session_id=session_id,
             role="user",
             content=message_content,

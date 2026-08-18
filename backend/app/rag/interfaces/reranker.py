@@ -26,7 +26,7 @@ class RerankerProvider(ABC):
     ) -> list[RankedResult]:
         """
         Re-score and re-rank a set of retrieved documents against the original query.
-        
+
         Args:
             query: The original search query
             documents: List of text snippets retrieved

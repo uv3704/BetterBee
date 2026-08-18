@@ -48,7 +48,7 @@ class RAGPipeline:
     ) -> AsyncGenerator[dict[str, Any], None]:
         """
         Runs the Advanced RAG query pipeline and yields events for streaming.
-        
+
         Events yielded:
         - {"type": "token", "content": str}
         - {"type": "citations", "content": list[dict]}
@@ -150,11 +150,11 @@ class RAGPipeline:
 
             # Format coordinate references
             page_ref = ""
-            if "page_number" in meta and meta["page_number"]:
+            if meta.get("page_number"):
                 page_ref = f"page {meta['page_number']}"
-            elif "sheet_name" in meta and meta["sheet_name"]:
+            elif meta.get("sheet_name"):
                 page_ref = f"sheet {meta['sheet_name']}"
-            elif "slide_number" in meta and meta["slide_number"]:
+            elif meta.get("slide_number"):
                 page_ref = f"slide {meta['slide_number']}"
 
             # Format for LLM context injection

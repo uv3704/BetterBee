@@ -5,9 +5,8 @@ Unit tests for BetterBee RAG pipeline components:
 - Search schemas
 """
 
-import pytest
-from app.rag.parser import TextParser
 from app.rag.chunker import Chunker
+from app.rag.parser import TextParser
 from app.schemas.search import SearchChunkMatch
 
 

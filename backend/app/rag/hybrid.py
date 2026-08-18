@@ -6,7 +6,6 @@ Maintains extremely low RAM overhead (<3MB) using rank_bm25 on tokenized text.
 """
 
 import re
-from typing import Any
 
 import structlog
 from rank_bm25 import BM25Okapi
@@ -31,7 +30,7 @@ def reciprocal_rank_fusion(
     """
     Fuses dense vector results with BM25 sparse keyword rankings using Reciprocal Rank Fusion (RRF):
     RRF_score(d) = 1/(k + r_dense(d)) + 1/(k + r_sparse(d))
-    
+
     Parameters:
     - vector_results: Chunks retrieved and ranked by ChromaDB cosine similarity.
     - all_chunks: Candidate chunks pool across the workspace.
@@ -44,7 +43,7 @@ def reciprocal_rank_fusion(
 
     # 1. Prepare BM25 Corpus
     tokenized_corpus = [tokenize(c.document) for c in all_chunks]
-    
+
     # Avoid zero-token edge cases
     if not any(tokenized_corpus):
         return vector_results[:top_k]

@@ -43,7 +43,7 @@ class Chunker:
     ) -> list[dict[str, Any]]:
         """
         Splits raw text into metadata-aware chunks with Parent-Child context preservation.
-        
+
         Each chunk contains:
         - `content`: Small-to-medium chunk for precise vector embedding.
         - `metadata.parent_content`: Broader surrounding section for full LLM synthesis.
@@ -70,7 +70,7 @@ class Chunker:
             # Compute parent context window (preceding + current + following chunk)
             prev_content = split_docs[idx - 1].page_content if idx > 0 else ""
             next_content = split_docs[idx + 1].page_content if idx < total_docs - 1 else ""
-            
+
             parent_parts = [p for p in [prev_content, doc.page_content, next_content] if p]
             parent_context = "\n\n".join(parent_parts)
 

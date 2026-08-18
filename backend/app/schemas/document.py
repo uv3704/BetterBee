@@ -5,7 +5,7 @@ BetterBee — Document Schemas.
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentUploadInitiateRequest(BaseModel):

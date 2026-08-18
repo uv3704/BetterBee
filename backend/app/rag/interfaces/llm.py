@@ -20,7 +20,7 @@ class LLMProvider(ABC):
     async def generate(self, messages: list[dict[str, str]], **kwargs) -> str:
         """
         Send a chat completion request to the model and return the text response.
-        
+
         Args:
             messages: List of chat messages, e.g. [{"role": "user", "content": "..."}]
             kwargs: Optional model parameters (temperature, max_tokens, etc.)
@@ -31,7 +31,7 @@ class LLMProvider(ABC):
     def stream(self, messages: list[dict[str, str]], **kwargs) -> AsyncGenerator[str, None]:
         """
         Send a chat completion request and yield response text fragments in real-time.
-        
+
         Args:
             messages: List of chat messages
             kwargs: Optional model parameters

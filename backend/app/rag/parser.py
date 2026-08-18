@@ -24,7 +24,7 @@ class DocumentParser(ABC):
     def parse(self, content_bytes: bytes) -> tuple[str, list[dict[str, Any]]]:
         """
         Parse raw file bytes and extract text and chunk metadata.
-        
+
         Returns:
             Tuple of (raw_extracted_text, list_of_page_or_slide_metadata)
         """

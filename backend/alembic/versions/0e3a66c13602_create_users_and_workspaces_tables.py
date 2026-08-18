@@ -1,7 +1,7 @@
 """create_users_and_workspaces_tables
 
 Revision ID: 0e3a66c13602
-Revises: 
+Revises:
 Create Date: 2026-06-25 16:16:49.654240
 """
 
