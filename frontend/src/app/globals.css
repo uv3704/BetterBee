@@ -141,3 +141,53 @@ body {
   text-decoration: underline !important;
 }
 
+/* --- Clerk UserButton Popover Visibility Fix --- */
+.cl-userButtonPopoverCard {
+  background-color: #171821 !important;
+  border: 1px solid #2e3242 !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7) !important;
+  border-radius: 0.75rem !important;
+}
+
+.cl-userButtonPopoverActionButton {
+  color: #f4f4f6 !important;
+  border-radius: 0.5rem !important;
+  padding: 0.6rem 0.85rem !important;
+  transition: all 0.15s ease !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background-color: #242736 !important;
+  color: #ffffff !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  color: #f4f4f6 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon,
+.cl-userButtonPopoverActionButtonIcon svg {
+  color: #d48b38 !important;
+  opacity: 1 !important;
+}
+
+.cl-userPreviewMainIdentifier {
+  color: #f4f4f6 !important;
+  font-weight: 600 !important;
+}
+
+.cl-userPreviewSecondaryIdentifier {
+  color: #a0a4b8 !important;
+}
+
+.cl-userButtonPopoverFooter {
+  border-top: 1px solid #282b3a !important;
+}
+
+.cl-userButtonPopoverFooter a {
+  color: #6d7185 !important;
+}
+
+

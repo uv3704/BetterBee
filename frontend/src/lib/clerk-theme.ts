@@ -46,5 +46,13 @@ export const clerkTheme = {
     formResendCodeLink: "text-[#d48b38] hover:text-[#e5a04e] text-xs",
     alert: "bg-[#1f1614] border border-[#3d261e] text-[#f4f4f6] text-xs rounded-lg",
     alertText: "text-xs text-[#eaebee]",
+    userButtonPopoverCard: "bg-[#171821] border border-[#2e3242] text-[#f4f4f6] rounded-xl p-2 shadow-2xl",
+    userButtonPopoverActionButton:
+      "text-[#f4f4f6] hover:bg-[#242736] hover:text-white transition-colors rounded-lg px-3 py-2.5 text-sm font-medium",
+    userButtonPopoverActionButtonText: "text-[#f4f4f6] font-medium text-sm",
+    userButtonPopoverActionButtonIcon: "text-[#d48b38] w-4 h-4 opacity-100",
+    userButtonPopoverFooter: "border-t border-[#262833] pt-2 mt-2",
+    userPreviewMainIdentifier: "text-[#f4f4f6] font-medium text-sm",
+    userPreviewSecondaryIdentifier: "text-[#a0a4b8] text-xs",
   },
 };
